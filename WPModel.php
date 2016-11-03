@@ -28,9 +28,9 @@ Abstract Class WPModel
     }
 
     protected function boot(){
-    	$post = Self::asPost($this->ID);
-    	$this->title = $post->post_title;
-    	$this->content = $post->post_content;
+    	$this->_post = Self::asPost($this->ID);
+    	$this->title = $this->_post->post_title;
+    	$this->content = $this->_post->post_content;
 
     	foreach($this->attributes as $attribute){
     		$this->$attribute = get_post_meta($this->ID, $attribute, TRUE);
@@ -68,12 +68,31 @@ Abstract Class WPModel
 		$this->$attribute = $value;
 	}
 
+	//-----------------------------------------------------
+	// RELATIONSHIPS 
+	//-----------------------------------------------------
+	public static function hasMany($model, $forignKey, $localKey){
+		return $model::where($forignKey, $this->get($localKey));
+	}
+
+	//-----------------------------------------------------
+	// MAGIC
+	// -----------------------------------------------------
 	public function __set($name, $value){
 		if($this->booted){
 			$this->dirty = true;
 		}
 
 		$this->$name = $value;
+	}
+
+	public function __get($name){
+		if(property_exists($this, $name)){
+			// Security issue, Permissons not respected
+			return $this->$name;
+		}else if(method_exists($this, $name)){
+			return $this->$name();
+		}
 	}
 
     //-----------------------------------------------------

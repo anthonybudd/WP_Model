@@ -1,6 +1,18 @@
 <?php
 
 
+Class Brand extends WPModel{
+	public $name = 'brand';
+
+	protected $attributes = [
+		'location',
+	];
+
+	public function products(){
+		return Brand::hasMany(Product::class, 'brand_id', 'id');
+	}
+}
+
 Class Product extends WPModel
 {
 	public $name = 'product';
@@ -11,40 +23,11 @@ Class Product extends WPModel
 		'type'
 	];
 
-	// Events
-	public function booting($object){
-		echo __METHOD__;
-		echo "<br>";
-	}
-
-	public function booted($object){
-		echo __METHOD__;
-		echo "<br>";
-	}
-
-	public function inserting($object){
-		echo __METHOD__;
-		echo "<br>";
-	}
-
-	public function inserted($object){
-		echo __METHOD__;
-		echo "<br>";
-	}
-
-	public function saving($object){
-		echo __METHOD__;
-		echo "<br>";
-	}
-
+	// Events (booting, booted, inserting, inserted, saving, saved)
 	public function saved($object){
 		echo __METHOD__;
 		echo "<br>";
 	}
-
-
-    
-    public function prefixValue($prefix){}
 }
 
 
@@ -71,29 +54,20 @@ $p->save();
 
 
 //-----------------------------------------------------
-// Getting and Saving
+// Getting
 //-----------------------------------------------------
-$p = get_post(7);
-$p = new Product($p);
+$postObject = get_post(15);
+$p = new Product(postObject);
 
 $p = Product::find(15);
 
 $p = new Product(15);
-$p->type = 'white';
-$p->location = 'London';
-
-$p->title = 'title';
-$p->content = 'content';
-$p->save();
-
 
 
 //-----------------------------------------------------
 // Where
 // -----------------------------------------------------
 $results = Product::where('location', 'London');
-var_dump($results);
-
 
 $result = Product::where([
 	[
@@ -104,18 +78,21 @@ $result = Product::where([
 		'value'   => '50',
 	],
 ]);
-var_dump($results);
 
 
 //-----------------------------------------------------
 // In
 // -----------------------------------------------------
 $products = Product::in(14, 15);
-var_dump($products);
 
 $products = Product::in([14, 15]);
-var_dump($products);
 
+//-----------------------------------------------------
+// Relationships
+// -----------------------------------------------------
+
+$brand = Brand::find(16);
+$brand->products;
 
 
 die();
