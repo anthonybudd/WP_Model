@@ -72,16 +72,16 @@ $product->hardDelete();
 ### Events
 WPModel has a rudimentary events system, this is the best way to hook into WPModel's core functions. All events with the suffix -ing fire as soon as the method has been called. All events with the suffix -ed will be fired at the very end of the method. Below is a list of available events;
 
-- booting, before the model has initialized
-- booted, the model has initialized
-- saving, before saving the model
-- inserting, before inserting a new post into the database
-- inserted, the new post has been inserted into the database
-- saved, the model has finished saving
-- deleting, 
-- deleted
-- hardDeleting
-- hardDeleted
+- booting: before the model has initialized
+- booted: the model has initialized
+- saving: before saving the model
+- inserting: before inserting a new post into the database
+- inserted: the new post has been inserted into the database
+- saved: the model has finished saving
+- deleting: before the model has been deleted
+- deleted: the post has been trashed by WordPress
+- hardDeleting: before the model has been hardDeleted
+- hardDeleted: the post has been trashed by WordPress and all of the meta data has been cleared
 
 When saving a new model the saving, inserting, inserted and saved events are all fired (in that order).
 ```php
