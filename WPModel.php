@@ -6,51 +6,56 @@
  * A simple drop-in abstract class for creating active
  * record style eloquent-esque models of Wordpress Posts.
  *
- * @todo Relationships, delete method, document funtions
+ * @todo Relationships, delete method, document funtions, Support data types: Array, Integer
  * @author     AnthonyBudd <anthonybudd94@gmail.com>
  */
 Abstract Class WPModel
 {
 	protected $attributes = [];
-	protected $unallowedAttributes = ['_id', 'ID', 'title', 'content', '_post'];
-	protected $dirty = false;
-	protected $booted = false;
+	protected $booted = FALSE;
+	public $dirty = FALSE;
 	public $ID = FALSE;
 	public $title;
 	public $content;
 	public $_post;
 
-	public function __construct($post = FALSE)
-	{    	
-		$this->triggerEvent('booting');
-		if($post instanceof WP_Post){
-			$this->ID = $post->ID;
-			$this->boot();
-		}else if(is_integer($post)){
-			if(Self::exists($post)){
-				$this->ID = $post;
-				$this->boot();
-			}else{
-				throw new Exception("Post Does not exist");	
+	public function __construct(Array $insert = [])
+	{    
+		$this->check();
+
+		if(count($insert) !== 0){
+			foreach($insert as $attribute => $value){
+				if(in_array($attribute, $this->attributes)){
+					$this->set($attribute, $value);
+				}
 			}
 		}
-		$this->booted = true;
-		$this->triggerEvent('booted');
+	}
+
+	protected function check()
+	{
+		$unallowedAttributes = ['_id', 'ID', 'title', 'content', '_post'];
+
+		foreach($this->attributes as $attribute){	
+			if(in_array($attribute, $unallowedAttributes)){
+				throw new Exception("The attribute name: {$attribute}, is reserved for the WPModel");
+			}
+		}
 	}
 
 	protected function boot()
 	{
-		$this->_post = Self::asPost($this->ID);
+		$this->triggerEvent('booting');
+		$this->_post = get_post($this->ID);
 		$this->title = $this->_post->post_title;
 		$this->content = $this->_post->post_content;
 
 		foreach($this->attributes as $attribute){
-			if(in_array($attribute, $this->unallowedAttributes)){
-				throw new Exception("The attribute name: {$attribute}, is reserved for the class");
-			}
-
 			$this->$attribute = get_post_meta($this->ID, $attribute, TRUE);
 		}
+
+		$this->booted = true;
+		$this->triggerEvent('booted');
 	}
 
 	protected function triggerEvent($event)
@@ -60,10 +65,14 @@ Abstract Class WPModel
 		}
 	}
 
+	protected function getName(){
+		$class = get_called_class();
+		return ( new ReflectionClass($class) )->getProperty('name')->getValue( (new $class) );
+	}
+
 	public static function register($args = [])
 	{
-		$class = get_called_class();
-		$postTypeName = ( new ReflectionClass($class) )->getProperty('name')->getValue( (new $class) );
+		$postTypeName = $this->getName();
 
 		$defualts = [
 			'public' => true,
@@ -73,14 +82,19 @@ Abstract Class WPModel
 		register_post_type($postTypeName, array_merge($defualts, $args));
 	}
 
-	public static function exists($id)
-	{
-		return (get_post_status($id) !== FALSE);
-	}
+	public static function exists($id, $type = TRUE)
+	{	
+		if($type){
+			if(
+				(get_post_status($id) !== FALSE) &&
+				(get_post_type($id) == $this->getName())){
+				return TRUE;
+			}
+		}else{
+			return (get_post_status($id) !== FALSE);
+		}
 
-	public function asPost()
-	{
-		return get_post($this->ID);
+		return FALSE;
 	}
 
 	public function get($attribute)
@@ -124,7 +138,12 @@ Abstract Class WPModel
 			// Security issue, Permissons not respected
 			return $this->$name;
 		}else if(method_exists($this, $name)){
-			return $this->$name();
+			$clone = Self::findBypassBoot($this->ID);
+			$relationship = $clone->$name();
+			
+			if(is_array($relationship)){
+				return $relationship;
+			}
 		}
 	}
 
@@ -132,10 +151,25 @@ Abstract Class WPModel
 	//-----------------------------------------------------
 	// FINDERS
 	// -----------------------------------------------------
-	public static function find($id)
+	public static function find($ID)
 	{
-		$class = get_called_class();
-		return new $class($id);
+		$className = get_called_class();
+		$class = new $className();
+		$class->ID = $ID;
+
+		if(Self::exists($ID)){
+			$class->boot();
+		}
+
+		return $class;
+	}
+
+	public static function findBypassBoot($ID)
+	{
+		$className = get_called_class();
+		$class = new $className();
+		$class->ID = $ID;
+		return $class;
 	}
 
 	/**
@@ -144,16 +178,22 @@ Abstract Class WPModel
 	 * @param  Integer $id post ID
 	 * @return Self
 	 */
-	public static function findOrFail($id)
+	public static function findOrFail($ID)
 	{
-		if(!Self::exists($id)){
+		if(!Self::exists($ID)){
 			throw new Exception("Post not found");
 		}
 
 		$class = get_called_class();
-		return new $class($id);
+		$class->ID = $ID;
+		$class->boot();
+		return new $class($ID);
 	}
 
+	
+	// -----------------------------------------------------
+	// Where
+	// -----------------------------------------------------
 	public static function where($key, $value = FALSE)
 	{
 		if(is_array($key)){
@@ -247,6 +287,28 @@ Abstract Class WPModel
 		update_post_meta($this->ID, '_id', $this->ID);
 		$this->triggerEvent('saved');
 		$this->dirty = FALSE;
+	}
+
+
+	// -----------------------------------------------------
+	// Delete
+	// -----------------------------------------------------
+	public function delete(){
+		$this->triggerEvent('deleting');
+		wp_delete_post($this->ID);
+		$this->triggerEvent('deleted');
+	}
+
+	public function hardDelete(){
+		$this->triggerEvent('hardDeleting');
+
+		foreach($this->attributes as $attribute){
+			delete_post_meta($this->ID, $attribute);
+			$this->$attribute = NULL;
+		}
+
+		wp_delete_post($this->ID);
+		$this->triggerEvent('hardDeleted');
 	}
 }
 
