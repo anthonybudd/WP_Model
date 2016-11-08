@@ -6,79 +6,80 @@
  * A simple drop-in abstract class for creating active
  * record style eloquent-esque models of Wordpress Posts.
  *
- * @todo Relationships, Timestamps, document funtions
+ * @todo Relationships, delete method, document funtions
  * @author     AnthonyBudd <anthonybudd94@gmail.com>
  */
 Abstract Class WPModel
 {
-    protected $attributes = [];
-    protected $unallowedAttributes = ['_id', 'created_at', 'updated_at'];
-    protected $dirty = false;
-    protected $booted = false;
-    public $ID = FALSE;
-    public $title;
-    public $content;
-    public $_post;
+	protected $attributes = [];
+	protected $unallowedAttributes = ['_id', 'ID', 'title', 'content', '_post'];
+	protected $dirty = false;
+	protected $booted = false;
+	public $ID = FALSE;
+	public $title;
+	public $content;
+	public $_post;
 
-    public function __construct($post = FALSE)
-    {    	
-    	$this->triggerEvent('booting');
-    	if($post instanceof WP_Post){
-    		$this->ID = $post->ID;
-    		$this->boot();
-    	}else if(is_integer($post)){
-    		if(Self::exists($post)){
-    			$this->ID = $post;
-    			$this->boot();
-    		}else{
-    			throw new Exception("Post Does not exist");	
-    		}
-    	}
-    	$this->booted = true;
-    	$this->triggerEvent('booted');
-    }
+	public function __construct($post = FALSE)
+	{    	
+		$this->triggerEvent('booting');
+		if($post instanceof WP_Post){
+			$this->ID = $post->ID;
+			$this->boot();
+		}else if(is_integer($post)){
+			if(Self::exists($post)){
+				$this->ID = $post;
+				$this->boot();
+			}else{
+				throw new Exception("Post Does not exist");	
+			}
+		}
+		$this->booted = true;
+		$this->triggerEvent('booted');
+	}
 
-    protected function boot()
-    {
-    	$this->_post = Self::asPost($this->ID);
-    	$this->title = $this->_post->post_title;
-    	$this->content = $this->_post->post_content;
+	protected function boot()
+	{
+		$this->_post = Self::asPost($this->ID);
+		$this->title = $this->_post->post_title;
+		$this->content = $this->_post->post_content;
 
-    	foreach($this->attributes as $attribute){
-    		if(in_array($attribute, $this->unallowedAttributes)){
-    			throw new Exception("The attribute name: {$attribute}, is reserved for the class");
-    		}
+		foreach($this->attributes as $attribute){
+			if(in_array($attribute, $this->unallowedAttributes)){
+				throw new Exception("The attribute name: {$attribute}, is reserved for the class");
+			}
 
-    		$this->$attribute = get_post_meta($this->ID, $attribute, TRUE);
-    	}
-    }
+			$this->$attribute = get_post_meta($this->ID, $attribute, TRUE);
+		}
+	}
 
-    protected function triggerEvent($event)
-    {
-    	if(method_exists($this, $event)){
-    		$this->$event($this);
-    	}
-    }
+	protected function triggerEvent($event)
+	{
+		if(method_exists($this, $event)){
+			$this->$event($this);
+		}
+	}
 
-    public static function register($args = [])
-    {
-    	$class = get_called_class();
+	public static function register($args = [])
+	{
+		$class = get_called_class();
 		$postTypeName = ( new ReflectionClass($class) )->getProperty('name')->getValue( (new $class) );
 
 		$defualts = [
 			'public' => true,
 			'label' => ucfirst($postTypeName)
 		];
+
 		register_post_type($postTypeName, array_merge($defualts, $args));
 	}
 
-    public static function exists($id)
-    {
-    	return (get_post_status($id) !== FALSE);
-    }
+	public static function exists($id)
+	{
+		return (get_post_status($id) !== FALSE);
+	}
 
-    public function asPost()
-    {
+	public function asPost()
+	{
 		return get_post($this->ID);
 	}
 
@@ -128,29 +129,35 @@ Abstract Class WPModel
 	}
 
 
-    //-----------------------------------------------------
+	//-----------------------------------------------------
 	// FINDERS
 	// -----------------------------------------------------
-   	public static function find($id)
-   	{
-   		$class = get_called_class();
-   		return new $class($id);
-   	}
+	public static function find($id)
+	{
+		$class = get_called_class();
+		return new $class($id);
+	}
 
-   	public static function findOrFail($id)
-   	{
-   		if(!Self::exists($id)){
-   			throw new Exception("Post could not be found");
-   		}
+	/**
+	 * [findOrFail description]
+	 * @throws  \Exception
+	 * @param  Integer $id post ID
+	 * @return Self
+	 */
+	public static function findOrFail($id)
+	{
+		if(!Self::exists($id)){
+			throw new Exception("Post not found");
+		}
 
-   		$class = get_called_class();
-   		return new $class($id);
-   	}
+		$class = get_called_class();
+		return new $class($id);
+	}
 
-   	public static function where($key, $value = FALSE)
-   	{
-   		if(is_array($key)){
-   			$params = [
+	public static function where($key, $value = FALSE)
+	{
+		if(is_array($key)){
+			$params = [
 				'meta_query' => []
 			];
 
@@ -165,8 +172,8 @@ Abstract Class WPModel
 			}
 
 			$query = new WP_Query($params);
-   		}else{
-   			$query = new WP_Query([
+		}else{
+			$query = new WP_Query([
 				'meta_query'        => [
 					[
 						'key'       => $key,
@@ -175,7 +182,7 @@ Abstract Class WPModel
 					],
 				]
 			]);
-   		}
+		}
 
 		$arr = [];
 		foreach($query->get_posts() as $key => $post){
@@ -183,27 +190,23 @@ Abstract Class WPModel
 		}
 
 		return $arr;
-   	}
+	}
 
-   	public static function in($ids = [])
-   	{
-   		$arr = [];
-   		if(is_array($ids)){
-			foreach($ids as $key => $id){
-				if(Self::exists($id)){
-					$arr[] = Self::find($id); 
-				}
-			}
-		}else{
-			foreach(func_get_args() as $key => $id){
-				if(Self::exists($id)){
-					$arr[] = Self::find($id); 
-				}
+	public static function in($ids = [])
+	{
+		$results = [];
+		if(!is_array($ids)){
+			$ids = func_get_args();
+		}
+
+		foreach($ids as $key => $id){
+			if(Self::exists($id)){
+				$results[] = Self::find($id); 
 			}
 		}
 
-		return $arr;
-   	}
+		return $results;
+	}
 
 
 	//-----------------------------------------------------
@@ -238,11 +241,12 @@ Abstract Class WPModel
 		}
 
 		foreach($this->attributes as $attribute){
-    		update_post_meta($this->ID, $attribute, $this->$attribute);
-    	}
-    	update_post_meta($this->ID, '_id', $this->ID);
-    	$this->triggerEvent('saved');
-    	$this->dirty = FALSE;
+			update_post_meta($this->ID, $attribute, $this->$attribute);
+		}
+		
+		update_post_meta($this->ID, '_id', $this->ID);
+		$this->triggerEvent('saved');
+		$this->dirty = FALSE;
 	}
 }
 

@@ -45,12 +45,12 @@ Product::register([
 //-----------------------------------------------------
 // New
 //-----------------------------------------------------
-$p = new Product();
-$p->type = 'white';
-$p->location = 'London';
-$p->title = 'title';
-$p->content = 'content';
-$p->save();
+$product = new Product();
+$product->type = 'white';
+$product->location = 'London';
+$product->title = 'title';
+$product->content = 'content';
+$product->save();
 
 
 //-----------------------------------------------------
