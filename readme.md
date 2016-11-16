@@ -51,9 +51,12 @@ $product->save();
 ```
 
 ### Find
+find() will return an instanciated model. If a post with id $id exists in the databse it's data will be loaded into the object.
 ```php
 $product = Product::find(15);
-
+```
+findorFail() will throw an exception if a post of the correct type cannot be found in the database.
+```php
 try {
     $product = Product::findorFail(15);
 } catch (Exception $e) {
@@ -62,26 +65,31 @@ try {
 ```
 
 ### Delete
+Delete will trash the post.
 ```php
 $product = Product::find(15);
-
 $product->delete();
+```
+Hard delete will trash the post and set all of it's meta (in that database and object) to NULL.
+```php
 $product->hardDelete();
 ```
 
 ### Events
 WPModel has a rudimentary events system, this is the best way to hook into WPModel's core functions. All events with the suffix -ing fire as soon as the method has been called. All events with the suffix -ed will be fired at the very end of the method. Below is a list of available events;
 
-- booting: before the model has initialized
-- booted: the model has initialized
-- saving: before saving the model
-- inserting: before inserting a new post into the database
-- inserted: the new post has been inserted into the database
-- saved: the model has finished saving
-- deleting: before the model has been deleted
-- deleted: the post has been trashed by WordPress
-- hardDeleting: before the model has been hardDeleted
-- hardDeleted: the post has been trashed by WordPress and all of the meta data has been cleared
+- booting, before the model has initialized
+- booted, the model has initialized
+- saving, before saving the model
+- inserting, before inserting a new post into the database
+- inserted, the new post has been inserted into the database
+- saved, the model has finished saving
+- deleting
+- deleted
+- hardDeleting
+- hardDeleted
+- patching
+- patched
 
 When saving a new model the saving, inserting, inserted and saved events are all fired (in that order).
 ```php
@@ -103,10 +111,28 @@ Class Product extends
 }
 ```
 
+### Patching
+By calling the static methods patchable whenever a form is submitted with the field _model. It will automatically create a new model or update an existing model if the field _id is also present.
+
+```php
+Product::patchable();
+```
+
+```html
+<form action="" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="_model" value="product">
+    
+    <!-- Omitting this will create a new model --> 
+    <input type="hidden" name="_id" value="15">
+
+    <input type="text" name="location" value="">
+    <input type="submit" value="Submit" name="submit">
+</form>
+```
 ### Todos
 
  - Improve Relationship system
- - Support data types: Array, Integer
+ - Support data types: Array, Integer, Date
 
 License
 ----
