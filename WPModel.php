@@ -423,8 +423,6 @@ Abstract Class WPModel
 			Self::triggerEvent('patching');
 
 			foreach(array_merge($post->attributes, ['title', 'content']) as $attribute){
-				dump(@$_REQUEST[$attribute]);
-
 				switch($method) {
 					case 'set_nulls':
 						update_post_meta($post->ID, $attribute, @$_REQUEST[$attribute]);
