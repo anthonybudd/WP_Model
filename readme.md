@@ -122,10 +122,11 @@ Product::patchable();
 <form action="" method="post" enctype="multipart/form-data">
     <input type="hidden" name="_model" value="product">
     
-    <!-- Omitting this will create a new model --> 
+    <!-- omitting this will create a new model --> 
     <input type="hidden" name="_id" value="15">
 
-    <input type="text" name="location" value="">
+    <input type="text" name="location" value="China">
+
     <input type="submit" value="Submit" name="submit">
 </form>
 ```

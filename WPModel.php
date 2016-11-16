@@ -420,7 +420,7 @@ Abstract Class WPModel
 				$post->save();
 			}
 
-			Self::triggerEvent('patching');
+			$post->triggerEvent('patching');
 
 			foreach(array_merge($post->attributes, ['title', 'content']) as $attribute){
 				switch($method) {
@@ -436,7 +436,7 @@ Abstract Class WPModel
 				}
 			}
 
-			Self::triggerEvent('patched');
+			$post->triggerEvent('patched');
 		}
 	}
 }
