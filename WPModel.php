@@ -15,6 +15,7 @@
 Abstract Class WPModel
 {
 	protected $attributes = [];
+	protected $data = [];
 	protected $booted = FALSE;
 	public $dirty = FALSE;
 	public $ID = FALSE;
@@ -25,7 +26,7 @@ Abstract Class WPModel
 	const PATCH_METHOD_SET_NULLS = 'set_nulls';
 
 	/**
-	 * Create a new instace with
+	 * Create a new instace with data
 	 * @param Array $insert Asoc array of data to start the instace with
 	 */
 	public function __construct(Array $insert = [])
@@ -39,6 +40,15 @@ Abstract Class WPModel
 				}
 			}
 		}
+	}
+	
+
+	/**
+	 * Create a new instace with data and save
+	 * @param Array $insert Asoc array of data to start the instace with
+	 */
+	public static function insert(Array $insert = []){
+		return ( new Deal($insert) )->save();
 	}
 
 
@@ -74,7 +84,7 @@ Abstract Class WPModel
 		$this->content = $this->_post->post_content;
 
 		foreach($this->attributes as $attribute){
-			$this->$attribute = get_post_meta($this->ID, $attribute, TRUE);
+			$this->data[$attribute] = get_post_meta($this->ID, $attribute, TRUE);
 		}
 
 		$this->booted = true;
@@ -157,7 +167,7 @@ Abstract Class WPModel
 	 */
 	public function get($attribute)
 	{
-		return @$this->$attribute;
+		return @$this->data[$attribute];
 	}
 
 
@@ -168,7 +178,7 @@ Abstract Class WPModel
 	 */
 	public function set($attribute, $value)
 	{
-		$this->$attribute = $value;
+		$this->data[$attribute] = $value;
 	}
 
 
@@ -185,27 +195,28 @@ Abstract Class WPModel
 	//-----------------------------------------------------
 	// MAGIC METHODS
 	// -----------------------------------------------------
-	public function __set($name, $value)
+	public function __set($attribute, $value)
 	{
 		if($this->booted){
 			$this->dirty = true;
 		}
 
-		$this->$name = $value;
+		$this->data[$attribute] = $value;
 	}
 
-	public function __get($name)
+	public function __get($attribute)
 	{
-		if(property_exists($this, $name)){
-			// Security issue, Permissons not respected
-			return $this->$name;
-		}else if(method_exists($this, $name)){
+		if(property_exists($this, $attribute)){
+			return $this->data[$attribute];
+		}else if(method_exists($this, $attribute)){
 			$clone = Self::findBypassBoot($this->ID);
-			$relationship = $clone->$name();
+			$relationship = $clone->$attribute();
 			
 			if(is_array($relationship)){
 				return $relationship;
 			}
+
+			return NULL;
 		}
 	}
 
@@ -335,7 +346,7 @@ Abstract Class WPModel
 			$defualts = [
 				'ID'           => $this->ID,
 				'post_title'   => $this->title,
-				'post_content' => $this->content,
+				'post_content' => ($this->content !== NULL)? $this->content :  ' ',
 			];
 
 			wp_update_post(array_merge($defualts, $args, $overwrite));
@@ -344,7 +355,7 @@ Abstract Class WPModel
 			$defualts = [
 				'post_status'  => 'publish',
 				'post_title'   => $this->title,
-				'post_content' => $this->content,
+				'post_content' => ($this->content !== NULL)? $this->content :  ' ',
 			];
 
 			$this->ID = wp_insert_post(array_merge($defualts, $args, $overwrite));
@@ -353,12 +364,17 @@ Abstract Class WPModel
 		}
 
 		foreach($this->attributes as $attribute){
-			update_post_meta($this->ID, $attribute, $this->$attribute);
+			update_post_meta(
+				$this->ID,
+				$attribute,
+				((@$this->data[$attribute] !== NULL)? $this->data[$attribute] : '') );
 		}
 		
 		update_post_meta($this->ID, '_id', $this->ID);
 		$this->triggerEvent('saved');
 		$this->dirty = FALSE;
+
+		return $this;
 	}
 
 
