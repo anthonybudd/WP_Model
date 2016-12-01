@@ -19,11 +19,13 @@ Abstract Class WPModel
 	protected $booted = FALSE;
 	public $dirty = FALSE;
 	public $ID = FALSE;
+	public $prefix = '';
 	public $title;
 	public $content;
 	public $_post;
 
 	const PATCH_METHOD_SET_NULLS = 'set_nulls';
+
 
 	/**
 	 * Create a new instace with data
@@ -40,8 +42,10 @@ Abstract Class WPModel
 				}
 			}
 		}
+
+		$this->boot();
 	}
-	
+
 
 	/**
 	 * Create a new instace with data and save
@@ -64,7 +68,7 @@ Abstract Class WPModel
 
 		foreach($this->attributes as $attribute){	
 			if(in_array($attribute, $unallowedAttributes)){
-				throw new Exception("The attribute name: {$attribute}, is reserved for the WPModel");
+				throw new Exception("The attribute name: {$attribute}, is reserved for WPModel");
 			}
 		}
 
@@ -79,17 +83,21 @@ Abstract Class WPModel
 	protected function boot()
 	{
 		$this->triggerEvent('booting');
-		$this->_post = get_post($this->ID);
-		$this->title = $this->_post->post_title;
-		$this->content = $this->_post->post_content;
 
-		foreach($this->attributes as $attribute){
-			$this->data[$attribute] = get_post_meta($this->ID, $attribute, TRUE);
+		if(is_integer($this->ID)){
+			$this->_post = get_post($this->ID);
+			$this->title = $this->_post->post_title;
+			$this->content = $this->_post->post_content;
+
+			foreach($this->attributes as $attribute){
+				$this->data[$attribute] = get_post_meta($this->ID, ($this->prefix.$attribute), TRUE);
+			}
 		}
 
 		$this->booted = true;
 		$this->triggerEvent('booted');
 	}
+
 
 	/**
 	 * Fire Event if the event method exists
@@ -100,20 +108,7 @@ Abstract Class WPModel
 	{
 		if(method_exists($this, $event)){
 			$this->$event($this);
-			return TRUE;
 		}
-
-		return FALSE;
-	}
-
-
-	/**
-	 * Get the name propery of the inherited class.
-	 * @return String
-	 */
-	public static function getName(){
-		$class = get_called_class();
-		return ( new ReflectionClass($class) )->getProperty('name')->getValue( (new $class) );
 	}
 
 
@@ -134,7 +129,45 @@ Abstract Class WPModel
 
 		register_post_type($postTypeName, array_merge($defualts, $args));
 
+		Self::addHooks();
+
 		return TRUE;
+	}
+
+
+	//-----------------------------------------------------
+	// HOOKS
+	// -----------------------------------------------------
+	public static function addHooks(){
+		add_action(('save_post'), [get_called_class(), 'onSave'], 9999999999);
+	}
+ 
+	public static function removeHooks(){
+		remove_action(('save_post'), [get_called_class(), 'onSave'], 9999999999);
+	}
+
+	public static function onSave($ID){
+		if(get_post_status($ID) == 'publish' &&
+			Self::exists($ID)){ // If post is the right post type
+			$post = Self::find($ID);
+			$post->save();
+		}
+	}
+
+
+
+
+
+	//-----------------------------------------------------
+	// UTILITY METHODS
+	// -----------------------------------------------------
+	/**
+	 * Get the name propery of the inherited class.
+	 * @return String
+	 */
+	public static function getName(){
+		$class = get_called_class();
+		return ( new ReflectionClass($class) )->getProperty('name')->getValue( (new $class) );
 	}
 
 
@@ -192,6 +225,12 @@ Abstract Class WPModel
 	}
 
 
+	public static function new(){
+		$class = get_called_class();
+		return new $class();
+	}
+
+
 	//-----------------------------------------------------
 	// MAGIC METHODS
 	// -----------------------------------------------------
@@ -201,12 +240,15 @@ Abstract Class WPModel
 			$this->dirty = true;
 		}
 
-		$this->data[$attribute] = $value;
+		if(in_array($attribute, $this->attributes)){
+			$this->data[$attribute] = $value;
+		}
 	}
+
 
 	public function __get($attribute)
 	{
-		if(property_exists($this, $attribute)){
+		if(in_array($attribute, $this->attributes)){
 			return $this->data[$attribute];
 		}else if(method_exists($this, $attribute)){
 			$clone = Self::findBypassBoot($this->ID);
@@ -219,7 +261,6 @@ Abstract Class WPModel
 			return NULL;
 		}
 	}
-
 
 	//-----------------------------------------------------
 	// RELATIONSHIPS 
@@ -238,15 +279,14 @@ Abstract Class WPModel
 	// -----------------------------------------------------
 	public static function find($ID)
 	{
-		$className = get_called_class();
-		$class = new $className();
-		$class->ID = $ID;
-
 		if(Self::exists($ID)){
+			$class = Self::new();
+			$class->ID = $ID;
 			$class->boot();
+			return $class;
 		}
 
-		return $class;
+		return Self::new();
 	}
 
 	public static function findBypassBoot($ID)
@@ -272,6 +312,49 @@ Abstract Class WPModel
 		return Self::find($ID);
 	}
 
+	public static function all(){
+		$args = [
+			'post_type' => Self::getName(),
+			'posts_per_page' => '9999999999999',
+		];
+
+		return ( new WP_Query($args) )->get_posts();
+	}
+
+	public static function list($metaKey = NULL){
+		$self = get_called_class();
+		$posts = $self::all();
+		$return = [];
+
+		foreach($posts as $post){
+			if(is_null($metaKey)){
+				$return[$post->ID] = $post;
+			}if(in_array($metaKey, ['title', 'post_title'])){
+				$return[$post->ID] = $post->post_title;
+			}else{
+				$return[$post->ID] = get_post_meta($post->ID, $metaKey, FALSE);
+			}
+		}
+
+		return $return;
+	}
+
+	public static function finder($finder){
+		$method = $finder.'Finder';
+
+		if(!in_array($method, array_column(( new ReflectionClass(get_called_class()) )->getMethods(), 'name'))){
+			throw new Exception("Finder not found");
+		}
+
+		$self = get_called_class();
+		$args = $self::$method();
+
+		if(!is_array($args)){
+			throw new Exception("Finder Method musy treyun an array");
+		}
+
+		return ( new WP_Query($args) )->get_posts();
+	}
 	
 	// -----------------------------------------------------
 	// WHERE
@@ -282,7 +365,6 @@ Abstract Class WPModel
 			$params = [
 				'meta_query' => []
 			];
-
 
 			foreach($key as $meta) {
 				$params['meta_query'][] = [
@@ -342,6 +424,8 @@ Abstract Class WPModel
 			'post_type' => $this->name
 		];
 
+		Self::removeHooks();
+
 		if(is_integer($this->ID)){
 			$defualts = [
 				'ID'           => $this->ID,
@@ -363,17 +447,18 @@ Abstract Class WPModel
 			$this->triggerEvent('inserted');
 		}
 
+		Self::addHooks();
+
 		foreach($this->attributes as $attribute){
 			update_post_meta(
 				$this->ID,
-				$attribute,
+				($this->prefix.$attribute),
 				((@$this->data[$attribute] !== NULL)? $this->data[$attribute] : '') );
-		}
-		
+		}	
+
 		update_post_meta($this->ID, '_id', $this->ID);
 		$this->triggerEvent('saved');
 		$this->dirty = FALSE;
-
 		return $this;
 	}
 
@@ -387,12 +472,13 @@ Abstract Class WPModel
 		$this->triggerEvent('deleted');
 	}
 
+
 	public function hardDelete(){
 		$this->triggerEvent('hardDeleting');
 
 		foreach($this->attributes as $attribute){
 			delete_post_meta($this->ID, $attribute);
-			$this->$attribute = NULL;
+			$this->data[$attribute] = NULL;
 		}
 
 		wp_delete_post($this->ID);
@@ -403,19 +489,19 @@ Abstract Class WPModel
 	//-----------------------------------------------------
 	// PATCHING 
 	//-----------------------------------------------------
-	public function patch($post, $method = FALSE)
+	public function patch($method = FALSE)
 	{
 		$this->triggerEvent('patching');
 
-		foreach(array_merge($post->attributes, ['title', 'content']) as $attribute){
+		foreach(array_merge($this->attributes, ['title', 'content']) as $attribute){
 			switch($method) {
 				case 'set_nulls':
-					update_post_meta($post->ID, $attribute, @$_REQUEST[$attribute]);
+					update_post_meta($this->ID, $attribute, @$_REQUEST[$attribute]);
 					break;
 				
 				default:
 					if(isset($_REQUEST[$attribute])){
-						update_post_meta($post->ID, $attribute, @$_REQUEST[$attribute]);
+						update_post_meta($this->ID, $attribute, @$_REQUEST[$attribute]);
 					}
 					break;
 			}
@@ -424,9 +510,10 @@ Abstract Class WPModel
 		$this->triggerEvent('patched');
 	}
 
-	public static function patchable($method = NULL)
+
+	public static function patchable($method = FALSE)
 	{
-		if(isset($_REQUEST['_model']) &&  $_REQUEST['_model'] === Self::getName()){
+		if(isset($_REQUEST['_model']) &&$_REQUEST['_model'] === Self::getName()){
 
 			if(isset($_REQUEST['_id'])){
 				$post = Self::find($_REQUEST['_id']);
@@ -436,23 +523,7 @@ Abstract Class WPModel
 				$post->save();
 			}
 
-			$post->triggerEvent('patching');
-
-			foreach(array_merge($post->attributes, ['title', 'content']) as $attribute){
-				switch($method) {
-					case 'set_nulls':
-						update_post_meta($post->ID, $attribute, @$_REQUEST[$attribute]);
-						break;
-					
-					default:
-						if(isset($_REQUEST[$attribute])){
-							update_post_meta($post->ID, $attribute, @$_REQUEST[$attribute]);
-						}
-						break;
-				}
-			}
-
-			$post->triggerEvent('patched');
+			$post->patch($method);
 		}
 	}
 }
