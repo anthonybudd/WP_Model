@@ -9,7 +9,7 @@
     ],
     "autoload": {
         "psr-0" : {
-            "WP_Model\\" : "src"
+            "WP_Model\\" : "src/"
         }
     },
     "require": {}
