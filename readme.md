@@ -7,7 +7,7 @@
 Require WP_Model with composer
 
 ```
-composer require anthonybudd/WP_Model
+$ composer require anthonybudd/WP_Model
 ```
 
 #### Or (not recommend)
