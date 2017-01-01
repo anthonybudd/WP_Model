@@ -1,7 +1,9 @@
 <?php
 
+namespace WP_Model;
+
 /**
- * WPModel
+ * WP_Model
  *
  * A simple drop-in abstract class for creating active
  * record style eloquent-esque models of Wordpress Posts.
@@ -12,7 +14,7 @@
  * - Support data types: Array, Integer
  * @author     AnthonyBudd <anthonybudd94@gmail.com>
  */
-Abstract Class WPModel
+Abstract Class WP_Model
 {
 	protected $attributes = [];
 	protected $data = [];
@@ -56,7 +58,7 @@ Abstract Class WPModel
 
 	/**
 	 * Check that the model does not use any
-	 * parameters reseveed for WPModel
+	 * parameters reseveed for WP_Model
 	 * @throws Exception
 	 * @return true
 	 */
@@ -66,7 +68,7 @@ Abstract Class WPModel
 
 		foreach($this->attributes as $attribute){	
 			if(in_array($attribute, $unallowedAttributes)){
-				throw new Exception("The attribute name: {$attribute}, is reserved for WPModel");
+				throw new Exception("The attribute name: {$attribute}, is reserved for WP_Model");
 			}
 		}
 

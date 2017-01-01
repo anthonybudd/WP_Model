@@ -27,7 +27,7 @@ Class Product extends WPModel
 {
     public $name = 'product';
     public $attributes = [
-        'color'
+        'color',
         'weight'
     ];
 }
