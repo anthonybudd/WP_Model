@@ -7,9 +7,9 @@
             "email": "anthonybudd94@gmail.com"
         }
     ],
-   "autoload": {
+  
         "autoload": {
             "files": ["src/WP_Model.php"]
         }
-    }
+    
 }
