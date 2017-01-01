@@ -1,6 +1,29 @@
 # WPModel
 
-##### A simple drop-in abstract class for creating active record style, eloquent-esque models of WordPress Posts.
+### A simple class for creating active record style, eloquent-esque models of WordPress Posts.
+
+```php
+
+Class Product extends WPModel
+{
+    public $name = 'product';
+    public $attributes = [
+        'color',
+        'weight'
+    ];
+}
+
+Product::register();
+
+$book = new Product;
+$book->color = 'Green';
+$book->weight = 100;
+$book->save();
+
+
+```
+
+***
 
 ### Installation
 
