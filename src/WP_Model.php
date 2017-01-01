@@ -69,7 +69,7 @@ Abstract Class WP_Model
 
 		foreach($this->attributes as $attribute){	
 			if(in_array($attribute, $unallowedAttributes)){
-				throw new Exception("The attribute name: {$attribute}, is reserved for WP_Model");
+				throw new \Exception("The attribute name: {$attribute}, is reserved for WP_Model");
 			}
 		}
 
@@ -165,7 +165,7 @@ Abstract Class WP_Model
 	 */
 	public static function getName(){
 		$class = get_called_class();
-		return ( new ReflectionClass($class) )->getProperty('name')->getValue( (new $class) );
+		return ( new \ReflectionClass($class) )->getProperty('name')->getValue( (new $class) );
 	}
 
 
@@ -304,7 +304,7 @@ Abstract Class WP_Model
 	public static function findOrFail($ID)
 	{
 		if(!Self::exists($ID)){
-			throw new Exception("Post not found");
+			throw new \Exception("Post not found");
 		}
 
 		return Self::find($ID);
@@ -340,15 +340,15 @@ Abstract Class WP_Model
 	public static function finder($finder){
 		$method = $finder.'Finder';
 
-		if(!in_array($method, array_column(( new ReflectionClass(get_called_class()) )->getMethods(), 'name'))){
-			throw new Exception("Finder not found");
+		if(!in_array($method, array_column(( new \ReflectionClass(get_called_class()) )->getMethods(), 'name'))){
+			throw new \Exception("Finder not found");
 		}
 
 		$self = get_called_class();
 		$args = $self::$method();
 
 		if(!is_array($args)){
-			throw new Exception("Finder Method must return an array");
+			throw new \Exception("Finder Method must return an array");
 		}
 
 		return ( new WP_Query($args) )->get_posts();
