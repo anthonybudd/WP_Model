@@ -1,6 +1,6 @@
 {
     "name": "anthonybudd/wp_model",
-    "type": "package",
+    "type": "library",
     "authors": [
         {
             "name": "Anthony Budd",
@@ -11,6 +11,5 @@
         "psr-0" : {
             "WP_Model\\" : "src/"
         }
-    },
-    "require": {}
+    }
 }
