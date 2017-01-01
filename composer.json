@@ -1,11 +1,16 @@
 {
     "name": "anthonybudd/wp_model",
-    "type": "library",
+    "type": "package",
     "authors": [
         {
             "name": "Anthony Budd",
             "email": "anthonybudd94@gmail.com"
         }
     ],
+    "autoload": {
+        "psr-0" : {
+            "WP_Model" : "src"
+        }
+    },
     "require": {}
 }

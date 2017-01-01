@@ -4,10 +4,18 @@
 
 ### Installation
 
+Require WP_Model with composer
+
+```
+composer require anthonybudd/WP_Model
+```
+
+#### Or (not recommend)
+
 Download the WPModel class and require it at the top of your functions.php file.
 
 ```php
-    require 'WPModel.php';
+    require 'src/WPModel.php';
 ```
 
 ### Setup
