@@ -18,6 +18,8 @@ Download the WPModel class and require it at the top of your functions.php file.
     require 'src/WPModel.php';
 ```
 
+***
+
 ### Setup
 You will then need to make a class that extends WPModel. This class will need the public property $name (lowercase String) and $attributes (Array of lowercase Strings).
 ```php
@@ -30,6 +32,8 @@ Class Product extends
     ];
 }
 ```
+
+***
 
 ### Register
 Before you can create a post you will need to register the post type. You can do this by calling the inherited static method register() in your functions.php file.
