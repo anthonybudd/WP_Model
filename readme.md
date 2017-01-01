@@ -23,7 +23,7 @@ Download the WPModel class and require it at the top of your functions.php file.
 ### Setup
 You will then need to make a class that extends WPModel. This class will need the public property $name (lowercase String) and $attributes (Array of lowercase Strings).
 ```php
-Class Product extends
+Class Product extends WPModel
 {
     public $name = 'product';
     public $attributes = [
