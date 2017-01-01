@@ -1,0 +1,11 @@
+{
+    "name": "anthonybudd/wp_model",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Anthony Budd",
+            "email": "anthonybudd94@gmail.com"
+        }
+    ],
+    "require": {}
+}

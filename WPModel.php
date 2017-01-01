@@ -24,8 +24,6 @@ Abstract Class WPModel
 	public $content;
 	public $_post;
 
-	const PATCH_METHOD_SET_NULLS = 'set_nulls';
-
 
 	/**
 	 * Create a new instace with data
@@ -153,9 +151,6 @@ Abstract Class WPModel
 			$post->save();
 		}
 	}
-
-
-
 
 
 	//-----------------------------------------------------
@@ -350,7 +345,7 @@ Abstract Class WPModel
 		$args = $self::$method();
 
 		if(!is_array($args)){
-			throw new Exception("Finder Method musy treyun an array");
+			throw new Exception("Finder Method must return an array");
 		}
 
 		return ( new WP_Query($args) )->get_posts();
