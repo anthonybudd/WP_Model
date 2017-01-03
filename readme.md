@@ -27,7 +27,6 @@ $book->color = 'Green';
 $book->weight = 100;
 $book->save();
 
-
 ```
 
 ***
