@@ -1,4 +1,4 @@
-# WPModel
+# WP_Model
 
 <p align="center"><img style="width: 50%;" src="https://github.com/anthonybudd/WP_Model/raw/master/logo.png"></p>
 
