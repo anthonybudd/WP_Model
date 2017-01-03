@@ -11,7 +11,7 @@
 
 ```php
 
-Class Product extends WPModel
+Class Product extends WP_Model
 {
     public $name = 'product';
     public $attributes = [
@@ -41,18 +41,18 @@ $ composer require anthonybudd/WP_Model
 
 #### Or (not recommend)
 
-Download the WPModel class and require it at the top of your functions.php file.
+Download the WP_Model class and require it at the top of your functions.php file.
 
 ```php
-    require 'src/WPModel.php';
+    require 'src/WP_Model.php';
 ```
 
 ***
 
 ### Setup
-You will then need to make a class that extends WPModel. This class will need the public property $name (lowercase String) and $attributes (Array of lowercase Strings).
+You will then need to make a class that extends WP_Model. This class will need the public property $name (lowercase String) and $attributes (Array of lowercase Strings).
 ```php
-Class Product extends WPModel
+Class Product extends WP_Model
 {
     public $name = 'product';
     public $attributes = [
@@ -122,7 +122,7 @@ $product->hardDelete();
 ```
 
 ### Events
-WPModel has a rudimentary events system, this is the best way to hook into WPModel's core functions. All events with the suffix -ing fire as soon as the method has been called. All events with the suffix -ed will be fired at the very end of the method. Below is a list of available events;
+WP_Model has a rudimentary events system, this is the best way to hook into WP_Model's core functions. All events with the suffix -ing fire as soon as the method has been called. All events with the suffix -ed will be fired at the very end of the method. Below is a list of available events;
 
 - booting, before the model has initialized
 - booted, the model has initialized
