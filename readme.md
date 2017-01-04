@@ -1,12 +1,5 @@
 # WP_Model
 
-<p align="center"><img style="width: 50%;" src="https://github.com/anthonybudd/WP_Model/raw/master/logo.png"></p>
-
-<p align="center">
-    <a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-    <a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
-
 ### A simple class for creating active record style, eloquent-esque models of WordPress Posts.
 
 ```php
@@ -75,7 +68,11 @@ Product::register([
 ]);
 ```
 
+***
+
 ### Create and Save
+You can create a model using the following methods.
+If the model is new this will trigger the 'inserting' and 'inserted' events
 ```php
 $product = new Product();
 $product->color = 'white';
@@ -96,11 +93,14 @@ $product = Product::insert([
 ]);
 ```
 
+***
+
 ### Find
-find() will return an instanciated model. If a post with id $id exists in the databse it's data will be loaded into the object.
+find() will return an instanciated model. If a post exists in the database with the ID of $id it's data will be loaded into the object.
 ```php
 $product = Product::find(15);
 ```
+
 findorFail() will throw an exception if a post of the correct type cannot be found in the database.
 ```php
 try {
@@ -110,26 +110,64 @@ try {
 }
 ```
 
+all() will return all posts. Use with caution.
+```php
+$allProducts = Product::all();
+```
+
+### Custom Finders
+
+finder() method allows you to create a custom finder method.
+To create a custom finder first make a method in your model named your finders name and suffixed with 'Finder' this method must return an array. The array will be given directly the constructer of a WP_Query. The results of this WP_Query will be returned by the finder() method.
+```php
+
+Class Product extends WP_Model
+{
+    ...
+
+    public function heavyFinder()
+    {  
+        return [
+            'meta_query' => [
+                [
+                    'key' => 'weight',
+                    'compare' => '>',
+                    'weight' => '1000',
+                ],
+            ]
+        ];
+    }
+
+}
+
+$heavyProducts = Product::finder('heavy');
+```
+
+***
+
 ### Delete
 Delete will trash the post.
 ```php
 $product = Product::find(15);
 $product->delete();
 ```
+
 Hard delete will trash the post and set all of it's meta (in that database and object) to NULL.
 ```php
 $product->hardDelete();
 ```
 
-### Events
-WP_Model has a rudimentary events system, this is the best way to hook into WP_Model's core functions. All events with the suffix -ing fire as soon as the method has been called. All events with the suffix -ed will be fired at the very end of the method. Below is a list of available events;
+***
 
-- booting, before the model has initialized
-- booted, the model has initialized
-- saving, before saving the model
-- inserting, before inserting a new post into the database
-- inserted, the new post has been inserted into the database
-- saved, the model has finished saving
+### Events
+WP_Model has a events system, this is the best way to hook into WP_Model's core functions. All events with the suffix -ing fire as soon as the method has been called. All events with the suffix -ed will be fired at the very end of the method. Below is a list of available events;
+
+- booting
+- booted
+- saving
+- inserting
+- inserted
+- saved
 - deleting
 - deleted
 - hardDeleting
@@ -143,7 +181,7 @@ Class Product extends WP_Model
 {
     public $name = 'product';
     public $attributes = [
-        'color'
+        'color',
         'weight'
     ];
     
@@ -171,7 +209,7 @@ Product::patchable();
     <!-- Omitting this will create a new model --> 
     <input type="hidden" name="_id" value="15">
 
-    <input type="text" name="location" value="China">
+    <input type="text" name="color" value="red">
     <input type="submit" value="Submit" name="submit">
 </form>
 ```
