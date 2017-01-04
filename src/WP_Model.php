@@ -322,7 +322,7 @@ Abstract Class WP_Model
 		return ( new WP_Query($args) )->get_posts();
 	}
 
-	public static function list($metaKey = NULL){
+	public static function asList($metaKey = NULL){
 		$self = get_called_class();
 		$posts = $self::all();
 		$return = [];
