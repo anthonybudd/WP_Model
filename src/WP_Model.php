@@ -23,6 +23,7 @@ Abstract Class WP_Model
 	protected $attributes = [];
 	protected $data = [];
 	protected $booted = FALSE;
+
 	public $dirty = FALSE;
 	public $ID = FALSE;
 	public $prefix = '';
@@ -246,11 +247,12 @@ Abstract Class WP_Model
 		}
 	}
 
-
 	public function __get($attribute)
 	{
 		if(in_array($attribute, $this->attributes)){
 			return $this->data[$attribute];
+		}else if(method_exists($this, ('_get'. ucfirst($attribute)))){
+			return call_user_func(array($this, ('_get'. ucfirst($attribute))));
 		}else if(method_exists($this, $attribute)){
 			$clone = Self::findBypassBoot($this->ID);
 			$relationship = $clone->$attribute();
@@ -313,10 +315,10 @@ Abstract Class WP_Model
 		return Self::find($ID);
 	}
 
-	public static function all(){
+	public static function all($limit = '999999999'){
 		$args = [
 			'post_type' => Self::getName(),
-			'posts_per_page' => '9999999999999',
+			'posts_per_page' => $limit,
 		];
 
 		return ( new WP_Query($args) )->get_posts();
