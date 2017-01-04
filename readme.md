@@ -139,7 +139,7 @@ WP_Model has a rudimentary events system, this is the best way to hook into WP_M
 
 When saving a new model the saving, inserting, inserted and saved events are all fired (in that order).
 ```php
-Class Product extends
+Class Product extends WP_Model
 {
     public $name = 'product';
     public $attributes = [
@@ -148,11 +148,11 @@ Class Product extends
     ];
     
     public function saving(){
-        echo "The save method has been called, but nothing has been written to the database yet."
+        echo "The save method has been called, but nothing has been written to the database yet.";
     }
     
     public function saved(){
-        echo "The save method has completed and the post and it's meta data have been updated in the database."
+        echo "The save method has completed and the post and it's meta data have been updated in the database.";
     }
 }
 ```

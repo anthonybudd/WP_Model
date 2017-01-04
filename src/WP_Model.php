@@ -226,7 +226,7 @@ Abstract Class WP_Model
 	}
 
 
-	public static function new(){
+	public static function newInstance(){
 		$class = get_called_class();
 		return new $class();
 	}
@@ -281,13 +281,13 @@ Abstract Class WP_Model
 	public static function find($ID)
 	{
 		if(Self::exists($ID)){
-			$class = Self::new();
+			$class = Self::newInstance();
 			$class->ID = $ID;
 			$class->boot();
 			return $class;
 		}
 
-		return Self::new();
+		return Self::newInstance();
 	}
 
 	public static function findBypassBoot($ID)
