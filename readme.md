@@ -117,8 +117,8 @@ $allProducts = Product::all();
 
 ### Custom Finders
 
-finder() method allows you to create a custom finder method.
-To create a custom finder first make a method in your model named your finders name and suffixed with 'Finder' this method must return an array. The array will be given directly the constructer of a WP_Query. The results of this WP_Query will be returned by the finder() method.
+The finder() method allows you to create a custom finder method.
+To create a custom finder first make a method in your model named your finders name and suffixed with 'Finder' this method must return an array. The array will be given directly to the constructer of a WP_Query. The results of the WP_Query will be returned by the finder() method.
 ```php
 
 Class Product extends WP_Model
@@ -132,8 +132,8 @@ Class Product extends WP_Model
                 [
                     'key' => 'weight',
                     'compare' => '>',
-                    'weight' => '1000',
-                ],
+                    'weight' => '1000'
+                ]
             ]
         ];
     }
