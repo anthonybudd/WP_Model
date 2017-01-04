@@ -2,6 +2,7 @@
 
 namespace WP_Model;
 
+use WP_Query;
 use Exception;
 use ReflectionClass;
 
@@ -343,6 +344,7 @@ Abstract Class WP_Model
 	}
 
 	public static function finder($finder){
+		$return = [];
 		$method = $finder.'Finder';
 
 		if(!in_array($method, array_column(( new ReflectionClass(get_called_class()) )->getMethods(), 'name'))){
@@ -356,9 +358,15 @@ Abstract Class WP_Model
 			throw new Exception("Finder Method must return an array");
 		}
 
-		return ( new WP_Query($args) )->get_posts();
+		$args['post_type'] = Self::getName();
+
+		foreach (( new WP_Query($args) )->get_posts() as $key => $post){
+			$return[] = Self::find($post->ID);
+		}
+
+		return $return;
 	}
-	
+
 	// -----------------------------------------------------
 	// WHERE
 	// -----------------------------------------------------

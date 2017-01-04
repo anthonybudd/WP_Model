@@ -72,7 +72,6 @@ Product::register([
 
 ### Create and Save
 You can create a model using the following methods.
-If the model is new this will trigger the 'inserting' and 'inserted' events
 ```php
 $product = new Product();
 $product->color = 'white';
@@ -132,6 +131,7 @@ Class Product extends WP_Model
                 [
                     'key' => 'weight',
                     'compare' => '>',
+                    'type' => 'NUMERIC',
                     'weight' => '1000'
                 ]
             ]
@@ -146,13 +146,13 @@ $heavyProducts = Product::finder('heavy');
 ***
 
 ### Delete
-Delete will trash the post.
+delete() will trash the post.
 ```php
 $product = Product::find(15);
 $product->delete();
 ```
 
-Hard delete will trash the post and set all of it's meta (in that database and object) to NULL.
+hardDelete() will trash the post and set all of it's meta (in that database and object) to NULL.
 ```php
 $product->hardDelete();
 ```
@@ -160,7 +160,7 @@ $product->hardDelete();
 ***
 
 ### Events
-WP_Model has a events system, this is the best way to hook into WP_Model's core functions. All events with the suffix -ing fire as soon as the method has been called. All events with the suffix -ed will be fired at the very end of the method. Below is a list of available events;
+WP_Model has an events system, this is the best way to hook into WP_Model's core functions. All events with the suffix -ing fire as soon as the method has been called. All events with the suffix -ed will be fired at the very end of the method. Below is a list of available events.
 
 - booting
 - booted
