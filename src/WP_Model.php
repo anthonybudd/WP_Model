@@ -10,8 +10,8 @@ use ReflectionClass;
 /**
  * WP_Model
  *
- * A simple drop-in abstract class for creating active
- * record style eloquent-esque models of Wordpress Posts.
+ * A simple class for creating active
+ * record, eloquent-esque models of WordPress Posts.
  *
  * @todo
  * - Relationships
@@ -70,7 +70,7 @@ Abstract Class WP_Model
 	 */
 	protected function check()
 	{
-		$unallowedAttributes = ['_id', 'ID', 'title', 'content', '_post'];
+		$unallowedAttributes = ['_id', 'ID', 'title', 'content', '_post', 'dirty'];
 
 		foreach($this->attributes as $attribute){	
 			if(in_array($attribute, $unallowedAttributes)){
@@ -83,8 +83,7 @@ Abstract Class WP_Model
 
 
 	/**
-	 * [boot description]
-	 * @return [type] [description]
+	 * Loads data into the model
 	 */
 	protected function boot()
 	{
@@ -96,7 +95,7 @@ Abstract Class WP_Model
 			$this->content = $this->_post->post_content;
 
 			foreach($this->attributes as $attribute){
-				$this->data[$attribute] = get_post_meta($this->ID, ($this->prefix.$attribute), TRUE);
+				$this->data[$attribute] = get_post_meta($this->ID, ($this->prefix . $attribute), TRUE);
 			}
 		}
 
@@ -144,14 +143,28 @@ Abstract Class WP_Model
 	//-----------------------------------------------------
 	// HOOKS
 	// -----------------------------------------------------
+	/**
+	 * Add operational hooks
+	 */
 	public static function addHooks(){
 		add_action(('save_post'), [get_called_class(), 'onSave'], 9999999999);
 	}
  
+
+ 	/**
+	 * Remove operational hooks
+	 */
 	public static function removeHooks(){
 		remove_action(('save_post'), [get_called_class(), 'onSave'], 9999999999);
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * Saves the post's meta
+	 * @param INT $ID
+	 */
 	public static function onSave($ID){
 		if(get_post_status($ID) == 'publish' &&
 			Self::exists($ID)){ // If post is the right post type
@@ -228,6 +241,10 @@ Abstract Class WP_Model
 	}
 
 
+	/**
+	 * Returns a new instance of the class
+	 * @return Object
+	 */
 	public static function newInstance(){
 		$class = get_called_class();
 		return new $class();
@@ -280,7 +297,12 @@ Abstract Class WP_Model
 
 	//-----------------------------------------------------
 	// FINDERS
-	// -----------------------------------------------------
+	// ----------------------------------------------------
+	/**
+	 * Find model by ID
+	 * @param  INT $ID model post ID
+	 * @return Object
+	 */
 	public static function find($ID)
 	{
 		if(Self::exists($ID)){
@@ -293,6 +315,10 @@ Abstract Class WP_Model
 		return Self::newInstance();
 	}
 
+	/**
+	 * AB: needs work
+	 * what if it does not exist, will error
+	 */
 	public static function findBypassBoot($ID)
 	{
 		$className = get_called_class();
@@ -301,8 +327,9 @@ Abstract Class WP_Model
 		return $class;
 	}
 
+
 	/**
-	 * [findOrFail description]
+	 * Find, if the model does not exist throw
 	 * @throws  \Exception
 	 * @param  Integer $id post ID
 	 * @return Self
@@ -316,15 +343,31 @@ Abstract Class WP_Model
 		return Self::find($ID);
 	}
 
+
+	/**
+	 * Returns all of a post type
+	 * @param  String $limit max posts
+	 * @return Array
+	 */
 	public static function all($limit = '999999999'){
+		$return = [];
 		$args = [
 			'post_type' => Self::getName(),
 			'posts_per_page' => $limit,
 		];
 
-		return ( new WP_Query($args) )->get_posts();
+		foreach (( new WP_Query($args) )->get_posts() as $key => $post){
+			$return[] = Self::find($post->ID);
+		}
+
+		return $return;
 	}
 
+
+	/**
+	 * AB: needs work
+	 * This fires all() which is risky
+	 */
 	public static function asList($metaKey = NULL){
 		$self = get_called_class();
 		$posts = $self::all();
@@ -343,6 +386,12 @@ Abstract Class WP_Model
 		return $return;
 	}
 
+
+	/**
+	 * [finder description]
+	 * @param  [type] $finder [description]
+	 * @return [type]         [description]
+	 */
 	public static function finder($finder){
 
 		$return = [];
@@ -373,9 +422,7 @@ Abstract Class WP_Model
 		return $return;
 	}
 
-	// -----------------------------------------------------
-	// WHERE
-	// -----------------------------------------------------
+
 	public static function where($key, $value = FALSE)
 	{
 		if(is_array($key)){
@@ -412,6 +459,7 @@ Abstract Class WP_Model
 
 		return $arr;
 	}
+
 
 	public static function in($ids = [])
 	{
@@ -506,6 +554,24 @@ Abstract Class WP_Model
 	//-----------------------------------------------------
 	// PATCHING 
 	//-----------------------------------------------------
+	
+	public static function patchable($method = FALSE)
+	{
+		if(isset($_REQUEST['_model']) &&$_REQUEST['_model'] === Self::getName()){
+
+			if(isset($_REQUEST['_id'])){
+				$post = Self::find($_REQUEST['_id']);
+			}else{
+				$className = get_called_class();
+				$post = new $className();
+				$post->save();
+			}
+
+			$post->patch($method);
+		}
+	}
+
+
 	public function patch($method = FALSE)
 	{
 		$this->triggerEvent('patching');
@@ -525,23 +591,6 @@ Abstract Class WP_Model
 		}
 
 		$this->triggerEvent('patched');
-	}
-
-
-	public static function patchable($method = FALSE)
-	{
-		if(isset($_REQUEST['_model']) &&$_REQUEST['_model'] === Self::getName()){
-
-			if(isset($_REQUEST['_id'])){
-				$post = Self::find($_REQUEST['_id']);
-			}else{
-				$className = get_called_class();
-				$post = new $className();
-				$post->save();
-			}
-
-			$post->patch($method);
-		}
 	}
 }
 
