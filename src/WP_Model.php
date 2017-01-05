@@ -253,7 +253,7 @@ Abstract Class WP_Model
 		if(in_array($attribute, $this->attributes)){
 			return $this->data[$attribute];
 		}else if(method_exists($this, ('_get'. ucfirst($attribute)))){
-			return call_user_func(array($this, ('_get'. ucfirst($attribute))));
+			return call_user_func([$this, ('_get'. ucfirst($attribute))]);
 		}else if(method_exists($this, $attribute)){
 			$clone = Self::findBypassBoot($this->ID);
 			$relationship = $clone->$attribute();
@@ -344,16 +344,17 @@ Abstract Class WP_Model
 	}
 
 	public static function finder($finder){
-		$return = [];
-		$method = $finder.'Finder';
 
-		if(!in_array($method, array_column(( new ReflectionClass(get_called_class()) )->getMethods(), 'name'))){
+		$return = [];
+		$finderMethod = $finder.'Finder';
+
+		if(!in_array($finderMethod, array_column(( new ReflectionClass(get_called_class()) )->getMethods(), 'name'))){
 			throw new Exception("Finder not found");
 		}
 
 		$self = get_called_class();
-		$args = $self::$method();
-
+		$args = $self::$finderMethod();
+		
 		if(!is_array($args)){
 			throw new Exception("Finder Method must return an array");
 		}
@@ -362,6 +363,11 @@ Abstract Class WP_Model
 
 		foreach (( new WP_Query($args) )->get_posts() as $key => $post){
 			$return[] = Self::find($post->ID);
+		}
+
+		$postFinderMethod = $finder.'PostFinder';
+		if(in_array($postFinderMethod, array_column(( new ReflectionClass(get_called_class()) )->getMethods(), 'name'))){
+			return $self::$postFinderMethod($return);
 		}
 
 		return $return;
