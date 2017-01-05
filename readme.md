@@ -1,6 +1,6 @@
 # WP_Model
 
-### A simple class for creating active record style, eloquent-esque models of WordPress Posts.
+### A simple class for creating active record, eloquent-esque models of WordPress Posts.
 
 ```php
 
@@ -75,9 +75,9 @@ You can create a model using the following methods.
 ```php
 $product = new Product();
 $product->color = 'white';
-$product->weight = '300';
-$product->title = 'post title';
-$product->content = 'post content';
+$product->weight = 300;
+$product->title = 'the post title';
+$product->content = 'the post content';
 $product->save();
 
 $product = new Product([
