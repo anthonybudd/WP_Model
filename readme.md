@@ -43,7 +43,7 @@ Download the WP_Model class and require it at the top of your functions.php file
 ***
 
 ### Setup
-You will then need to make a class that extends WP_Model. This class will need the public property $name (lowercase String) and $attributes (Array of lowercase Strings).
+You will then need to make a class that extends WP_Model. This class will need the public property $name (this will be the post type) and $attributes, an array of strings.
 
 If you need to prefix the model's data in your post_meta table add a public property $prefix. This will be added to the post meta so the attribute 'color' will be saved in the database using the meta_key 'wp_model_color'
 ```php
