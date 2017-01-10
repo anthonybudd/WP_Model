@@ -169,6 +169,8 @@ hardDelete() will trash the post and set all of it's meta (in that database and 
 $product->hardDelete();
 ```
 
+restore() will unTrash the post and restore the model (the attribues's daat will )
+
 ***
 
 ### Events

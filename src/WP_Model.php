@@ -1,12 +1,5 @@
 <?php
 
-namespace WP_Model;
-
-use WP_Query;
-use Exception;
-use ReflectionClass;
-
-
 /**
  * WP_Model
  *
@@ -95,7 +88,7 @@ Abstract Class WP_Model
 			$this->content = $this->_post->post_content;
 
 			foreach($this->attributes as $attribute){
-				$this->data[$attribute] = get_post_meta($this->ID, ($this->prefix . $attribute), TRUE);
+				$this->data[$attribute] = $this->getMeta($attribute);
 			}
 		}
 
@@ -161,7 +154,6 @@ Abstract Class WP_Model
 
 	/**
 	 * Hook
-	 *
 	 * Saves the post's meta
 	 * @param INT $ID
 	 */
@@ -379,7 +371,7 @@ Abstract Class WP_Model
 			}if(in_array($metaKey, ['title', 'post_title'])){
 				$return[$post->ID] = $post->post_title;
 			}else{
-				$return[$post->ID] = get_post_meta($post->ID, $metaKey, FALSE);
+				$return[$post->ID] = $this->getMeta($metaKey);
 			}
 		}
 
@@ -422,7 +414,7 @@ Abstract Class WP_Model
 		return $return;
 	}
 
-
+	
 	public static function where($key, $value = FALSE)
 	{
 		if(is_array($key)){
@@ -515,16 +507,26 @@ Abstract Class WP_Model
 		Self::addHooks();
 
 		foreach($this->attributes as $attribute){
-			update_post_meta(
-				$this->ID,
-				($this->prefix.$attribute),
-				((@$this->data[$attribute] !== NULL)? $this->data[$attribute] : '') );
+			$this->setMeta($attribute, ((@$this->data[$attribute] !== NULL)? $this->data[$attribute] : ''));
 		}	
 
-		update_post_meta($this->ID, '_id', $this->ID);
+		$this->setMeta('_id', $this->ID);
 		$this->triggerEvent('saved');
 		$this->dirty = FALSE;
 		return $this;
+	}
+
+
+	public function getMeta($key){
+		return get_post_meta($this->ID, ($this->prefix.$key), TRUE);
+	}
+
+	public function setMeta($key, $value){
+		update_post_meta($this->ID, ($this->prefix.$key), $value);
+	}
+
+	public function deleteMeta($key){
+		delete_post_meta($this->ID, ($this->prefix.$key));
 	}
 
 
@@ -537,24 +539,37 @@ Abstract Class WP_Model
 		$this->triggerEvent('deleted');
 	}
 
-
 	public function hardDelete(){
 		$this->triggerEvent('hardDeleting');
 
+		$defualts = [
+			'ID'           => $this->ID,
+			'post_title'   => '',
+			'post_content' => '',
+		];
+
+		wp_update_post(array_merge($defualts, $args, $overwrite));
+
 		foreach($this->attributes as $attribute){
-			delete_post_meta($this->ID, $attribute);
+			$this->deleteMeta($attribute);
 			$this->data[$attribute] = NULL;
 		}
 
+		$this->setMeta('_id', $this->ID);
+		$this->setMeta('_hardDeleted', '1');
 		wp_delete_post($this->ID);
 		$this->triggerEvent('hardDeleted');
+	}
+
+	public static function restore($ID){
+		wp_untrash_post($ID);
+		return Self::find($ID);
 	}
 
 
 	//-----------------------------------------------------
 	// PATCHING 
 	//-----------------------------------------------------
-	
 	public static function patchable($method = FALSE)
 	{
 		if(isset($_REQUEST['_model']) &&$_REQUEST['_model'] === Self::getName()){
