@@ -45,6 +45,8 @@ Download the WP_Model class and require it at the top of your functions.php file
 ### Setup
 You will then need to make a class that extends WP_Model. This class will need the public property $name (this will be the post type) and $attributes, an array of strings.
 
+If you would like to have any taxonomies loaded into the model, add the optional parameter $taxonomies (array of taxonomy slugs) to the class.
+
 If you need to prefix the model's data in your post_meta table add a public property $prefix. This will be added to the post meta so the attribute 'color' will be saved in the database using the meta_key 'wp_model_color'
 ```php
 Class Product extends WP_Model
@@ -54,6 +56,9 @@ Class Product extends WP_Model
     public $attributes = [
         'color',
         'weight'
+    ];
+    public $taxonomies = [
+        'category',
     ];
 }
 ```
@@ -174,7 +179,7 @@ restore() will unTrash the post and restore the model (the attribues's daat will
 ***
 
 ### Events
-WP_Model has an events system, this is the best way to hook into WP_Model's core functions. All events with the suffix -ing fire as soon as the method has been called. All events with the suffix -ed will be fired at the very end of the method. Below is a list of available events.
+WP_Model has an events system, this is the best way to hook into WP_Model's core functions. All events with the suffix -ing fire as soon as the method has been called. All events with the suffix -ed will be fired at the very end of the method. Below is a list of available events. All events will be supplied with the model that triggered the event
 
 - booting
 - booted
@@ -203,8 +208,9 @@ Class Product extends WP_Model
         echo "The save method has been called, but nothing has been written to the database yet.";
     }
     
-    public function saved(){
+    public function saved($model){
         echo "The save method has completed and the post and it's meta data have been updated in the database.";
+        echo "The Model's ID is". $model->ID;
     }
 }
 ```

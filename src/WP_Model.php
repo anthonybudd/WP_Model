@@ -92,6 +92,12 @@ Abstract Class WP_Model
 			}
 		}
 
+		if(isset($this->taxonomies)){
+			foreach($this->taxonomies as $taxonomy){
+				$this->data[$taxonomy] = get_the_terms($this->ID, $taxonomy);
+			}
+		}
+
 		$this->booted = true;
 		$this->triggerEvent('booted');
 	}
@@ -260,7 +266,9 @@ Abstract Class WP_Model
 	public function __get($attribute)
 	{
 		if(in_array($attribute, $this->attributes)){
-			return $this->data[$attribute];
+			return $this->get($attribute);
+		}if(in_array($attribute, $this->taxonomies)){
+			return $this->get($attribute);
 		}else if(method_exists($this, ('_get'. ucfirst($attribute)))){
 			return call_user_func([$this, ('_get'. ucfirst($attribute))]);
 		}else if(method_exists($this, $attribute)){
@@ -422,7 +430,7 @@ Abstract Class WP_Model
 				'meta_query' => []
 			];
 
-			foreach($key as $meta) {
+			foreach($key as $meta){
 				$params['meta_query'][] = [
 					'key'       => $meta['key'],
 					'value'     => $meta['value'],
