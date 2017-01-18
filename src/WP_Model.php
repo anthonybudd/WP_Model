@@ -83,7 +83,7 @@ Abstract Class WP_Model
 	{
 		$this->triggerEvent('booting');
 
-		if(is_integer($this->ID)){
+		if(!empty($this->ID)){
 			$this->_post = get_post($this->ID);
 			$this->title = $this->_post->post_title;
 			$this->content = $this->_post->post_content;
@@ -96,6 +96,9 @@ Abstract Class WP_Model
 		if(!empty($this->taxonomies)){
 			foreach($this->taxonomies as $taxonomy){
 				$this->tax_data[$taxonomy] = get_the_terms($this->ID, $taxonomy);
+				if($this->tax_data[$taxonomy] === FALSE){
+					$this->tax_data[$taxonomy] = [];
+				}
 			}
 		}
 
@@ -243,6 +246,11 @@ Abstract Class WP_Model
 		return $this->_post;
 	}
 
+	public function featuredImage()
+	{
+		return get_the_post_thumbnail_url($this->ID);
+	}
+
 
 	/**
 	 * Returns a new instance of the class
@@ -357,8 +365,10 @@ Abstract Class WP_Model
 	public static function all($limit = '999999999'){
 		$return = [];
 		$args = [
-			'post_type' => Self::getName(),
+			'post_type' 	 => Self::getName(),
 			'posts_per_page' => $limit,
+			'order'          => 'DESC',
+			'orderby'        => 'id',
 		];
 
 		foreach((new WP_Query($args))->get_posts() as $key => $post){
@@ -379,12 +389,13 @@ Abstract Class WP_Model
 			$posts = $self::all();
 		}
 
+
 		$return = [];
 		foreach($posts as $post){
 			if(is_null($metaKey)){
 				$return[$post->ID] = $post;
 			}if(in_array($metaKey, ['title', 'post_title'])){
-				$return[$post->ID] = $post->post_title;
+				$return[$post->ID] = $post->title;
 			}else{
 				$return[$post->ID] = $this->getMeta($metaKey);
 			}

@@ -102,6 +102,27 @@ $product = Product::insert([
 
 ***
 
+### Virtual Properties
+If you would like to add virtual properties to your models, you can do this by adding a method named the virtual property's name prefixed with '_get'
+
+```php
+
+Class Product extends WP_Model
+{
+    ...
+
+    public function _getHumanWeight()
+    {  
+        return $this->weight . 'Kg';
+    }
+}
+
+$product = Product::find(15);
+echo $product->humanWeight;
+```
+
+***
+
 ### Find
 find() will return an instanciated model. If a post exists in the database with the ID of $id it's data will be loaded into the object.
 ```php
