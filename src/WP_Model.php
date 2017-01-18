@@ -382,7 +382,7 @@ Abstract Class WP_Model
 		$return = [];
 		foreach($posts as $post){
 			if(is_null($metaKey)){
-				$return[$post->ID] = $ ;
+				$return[$post->ID] = $post;
 			}if(in_array($metaKey, ['title', 'post_title'])){
 				$return[$post->ID] = $post->post_title;
 			}else{
@@ -406,7 +406,7 @@ Abstract Class WP_Model
 		$self = get_called_class();
 
 		if(!in_array($finderMethod, array_column(( new ReflectionClass(get_called_class()) )->getMethods(), 'name'))){
-			throw new Exception("Finder method {$finderMethod} not found in ". $self::class);
+			throw new Exception("Finder method {$finderMethod} not found in {$self}");
 		}
 
 		
