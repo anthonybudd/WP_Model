@@ -570,7 +570,7 @@ Abstract Class WP_Model
 	// -----------------------------------------------------
 	public function delete(){
 		$this->triggerEvent('deleting');
-		wp_delete_post($this->ID);
+		wp_trash_post($this->ID);
 		$this->triggerEvent('deleted');
 	}
 
@@ -592,7 +592,7 @@ Abstract Class WP_Model
 
 		$this->setMeta('_id', $this->ID);
 		$this->setMeta('_hardDeleted', '1');
-		wp_delete_post($this->ID);
+		wp_delete_post($this->ID, TRUE);
 		$this->triggerEvent('hardDeleted');
 	}
 

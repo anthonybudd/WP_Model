@@ -192,12 +192,15 @@ $product = Product::find(15);
 $product->delete();
 ```
 
-hardDelete() will trash the post and set all of it's meta (in that database and object) to NULL.
+hardDelete() will delete the post's r the post and set all of it's meta (in the database and in the object) to NULL.
 ```php
 $product->hardDelete();
 ```
 
-restore() will unTrash the post and restore the model (the attribues's daat will )
+restore() will unTrash the post and restore the model. You cannot restore hardDeleted models.
+```php
+Product::restore(15);
+```
 
 ***
 
