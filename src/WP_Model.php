@@ -7,7 +7,6 @@
  * record, eloquent-esque models of WordPress Posts.
  *
  * @todo
- * - Relationships
  * - Document Funtions
  * - Support data types: Array, Integer
  * @author     AnthonyBudd <anthonybudd94@gmail.com>

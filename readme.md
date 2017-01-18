@@ -221,11 +221,7 @@ When saving a new model the saving, inserting, inserted and saved events are all
 ```php
 Class Product extends WP_Model
 {
-    public $name = 'product';
-    public $attributes = [
-        'color',
-        'weight'
-    ];
+    ...
     
     public function saving(){
         echo "The save method has been called, but nothing has been written to the database yet.";
@@ -258,7 +254,6 @@ Product::patchable();
 ```
 ### Todos
 
- - Improve Relationship system
  - Support data types: Array, Integer, Date
 
 License
