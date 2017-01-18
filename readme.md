@@ -145,13 +145,14 @@ $product = Product::find(15);
 echo json_encode($product);
 ```
 
+Result:
 ```json
 {
-    ID: 15,
-    title: 'The post title',
-    content: 'The post content',
-    color: 'blue'
-    weight: '250'
+    "ID":       15,
+    "title":    "The post title",
+    "content":  "The post content",
+    "color":    "blue",
+    "weight":   "250"
 }
 ```
 
