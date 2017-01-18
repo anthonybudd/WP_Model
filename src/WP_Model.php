@@ -265,12 +265,20 @@ Abstract Class WP_Model implements JsonSerializable
 		$model = [];
 
 		foreach($this->attributes as $key => $attribute){
-			$model[$attribute] = $this->get($attribute);
+			if(!empty($this->protected) && !in_array($attribute, $this->protected)){
+				// Do not add to $model
+			}else{
+				$model[$attribute] = $this->get($attribute);
+			}
 		}
 
 		if(!empty($this->serialize)){
 			foreach($this->serialize as $key => $attribute){
-				$model[$attribute] = $this->$attribute;
+				if(!empty($this->protected) && !in_array($attribute, $this->protected)){
+					// Do not add to $model
+				}else{
+					$model[$attribute] = $this->$attribute;
+				}
 			}
 		}
 
