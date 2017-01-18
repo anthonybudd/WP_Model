@@ -127,7 +127,7 @@ echo $product->humanWeight;
 
 If you want to JSON encode a model and keep virtual properties you can do this by adding the property $serialize to the model.
 
-Conversely, if you would like to hide a propery you can do this by adding $protected to the model
+Conversely, if you would like to hide a property you can do this by adding $protected to the model
 
 ```php
 
