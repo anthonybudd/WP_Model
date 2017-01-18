@@ -123,6 +123,41 @@ echo $product->humanWeight;
 
 ***
 
+### Serialization
+
+```php
+
+Class Product extends WP_Model
+{
+    ...
+
+    public $serialize = [
+        'humanWeight',
+    ];
+
+    public function _getHumanWeight()
+    {  
+        return $this->weight . 'Kg';
+    }
+}
+
+$product = Product::find(15);
+echo json_encode($product);
+```
+
+```json
+{
+    ID: 15,
+    title: 'The post title',
+    content: 'The post content',
+    color: 'blue'
+    weight: '250'
+}
+```
+
+***
+
+
 ### Find
 find() will return an instanciated model. If a post exists in the database with the ID of $id it's data will be loaded into the object.
 ```php
@@ -293,11 +328,3 @@ Product::asList('weight')
 ### Todos
 
  - Support data types: Array, Integer, Date
-
-License
-----
-
-MIT
-
-Does this even matter? If you wanted to steal this code there is pretty much nothing I could do to stop you...
-

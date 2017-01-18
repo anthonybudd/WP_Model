@@ -11,7 +11,7 @@
  * - Support data types: Array, Integer
  * @author     AnthonyBudd <anthonybudd94@gmail.com>
  */
-Abstract Class WP_Model
+Abstract Class WP_Model implements JsonSerializable
 {
 	protected $attributes = [];
 	protected $tax_data = [];
@@ -187,7 +187,6 @@ Abstract Class WP_Model
 		return ( new ReflectionClass($class) )->getProperty('name')->getValue( (new $class) );
 	}
 
-
 	/**
 	 * Check if the post exists by Post ID
 	 * @param  String|Integer  $id   Post ID
@@ -209,7 +208,6 @@ Abstract Class WP_Model
 		return FALSE;
 	}
 
-
 	/**
 	 * Get property of model
 	 * @param  property name $attribute [description]
@@ -224,7 +222,6 @@ Abstract Class WP_Model
 		return $default;
 	}
 
-
 	/**
 	 * Set property of model
 	 * @param String $attribute
@@ -235,7 +232,6 @@ Abstract Class WP_Model
 		$this->data[$attribute] = $value;
 	}
 
-
 	/**
 	 * Get the original post of the model
 	 * @return WP_Post
@@ -244,13 +240,7 @@ Abstract Class WP_Model
 	{
 		return $this->_post;
 	}
-
-	public function featuredImage()
-	{
-		return get_the_post_thumbnail_url($this->ID);
-	}
-
-
+	
 	/**
 	 * Returns a new instance of the class
 	 * @return Object
@@ -259,6 +249,39 @@ Abstract Class WP_Model
 		$class = get_called_class();
 		return new $class();
 	}
+
+	public function featuredImage()
+	{
+		return get_the_post_thumbnail_url($this->ID);
+	}
+
+	public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
+
+	public function toArray()
+	{
+		$model = [];
+
+		foreach($this->attributes as $key => $attribute){
+			$model[$attribute] = $this->get($attribute);
+		}
+
+		if(!empty($this->serialize)){
+			foreach($this->serialize as $key => $attribute){
+				$model[$attribute] = $this->$attribute;
+			}
+		}
+
+		$model['ID'] = $this->ID;
+		$model['title'] = $this->title;
+		$model['content'] = $this->content;
+
+		return $model;
+	}
+
+
 
 
 	//-----------------------------------------------------
@@ -294,6 +317,18 @@ Abstract Class WP_Model
 			return NULL;
 		}
 	}
+
+	//-----------------------------------------------------
+	// RELATIONSHIPS 
+	//-----------------------------------------------------
+	public static function hasMany($model, $forignKey, $localKey)
+	{
+		if(in_array($localKey, ['id', 'ID', 'post_id'])){
+			$localKey = '_id';
+		}
+		return $model::where($forignKey, $this->get($localKey));
+	}
+
 
 	//-----------------------------------------------------
 	// FINDERS
