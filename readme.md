@@ -125,6 +125,8 @@ echo $product->humanWeight;
 
 ### Serialization
 
+If you want to JSON encode a model and keep virtual properties you can do this by adding the property $serialize to the model.
+
 ```php
 
 Class Product extends WP_Model
@@ -148,11 +150,12 @@ echo json_encode($product);
 Result:
 ```json
 {
-    "ID":       15,
-    "title":    "The post title",
-    "content":  "The post content",
-    "color":    "blue",
-    "weight":   "250"
+    "ID":           15,
+    "title":        "The post title",
+    "content":      "The post content",
+    "color":        "blue",
+    "weight":       "250",
+    "HumanWeight":  "250Kg"
 }
 ```
 
@@ -306,6 +309,7 @@ $product->post() // Returns WP_Post object
 
 $product->featuredImage() // Returns featured image URL
 
+$product->toArray() // Returns an array representaion of the model
 
 Product::asList() // Returns array of posts keyed by post id
 [
