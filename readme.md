@@ -199,7 +199,7 @@ $product->hardDelete();
 
 restore() will unTrash the post and restore the model. You cannot restore hardDeleted models.
 ```php
-Product::restore(15);
+$product = Product::restore(15);
 ```
 
 ***
@@ -237,6 +237,8 @@ Class Product extends WP_Model
 }
 ```
 
+***
+
 ### Patching
 By calling the static methods patchable whenever a form is submitted with the field _model. It will automatically create a new model or update an existing model if the field _id is also present.
 
@@ -255,6 +257,39 @@ Product::patchable();
     <input type="submit" value="Submit" name="submit">
 </form>
 ```
+
+***
+
+### Helper Methods
+
+```php
+Product::exists(15); // True or False
+
+
+$product->post() // Returns WP_Post object
+
+$product->featuredImage() // Returns featured image URL
+
+
+Product::asList() // Returns array of posts keyed by post id
+[
+    15 => Product
+    16 => Product
+    17 => Product
+]
+
+// You can also specify the value of each element in the array to be meta from the model.
+Product::asList('weight')
+[
+    15 => "250"
+    16 => "100"
+    17 => "95"
+]
+```
+
+
+***
+
 ### Todos
 
  - Support data types: Array, Integer, Date

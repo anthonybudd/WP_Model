@@ -296,18 +296,6 @@ Abstract Class WP_Model
 	}
 
 	//-----------------------------------------------------
-	// RELATIONSHIPS 
-	//-----------------------------------------------------
-	public static function hasMany($model, $forignKey, $localKey)
-	{
-		if(in_array($localKey, ['id', 'ID', 'post_id'])){
-			$localKey = '_id';
-		}
-		return $model::where($forignKey, $this->get($localKey));
-	}
-
-
-	//-----------------------------------------------------
 	// FINDERS
 	// ----------------------------------------------------
 	/**
