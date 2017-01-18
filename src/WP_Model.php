@@ -272,7 +272,7 @@ Abstract Class WP_Model
 	{
 		if(in_array($attribute, $this->attributes)){
 			return $this->get($attribute);
-		}else if(in_array($attribute, $this->taxonomies)){
+		}else if(isset($this->taxonomies) && in_array($attribute, $this->taxonomies)){
 			return $this->tax_data[$attribute];
 		}else if(method_exists($this, ('_get'. ucfirst($attribute)))){
 			return call_user_func([$this, ('_get'. ucfirst($attribute))]);
