@@ -15,6 +15,7 @@
 Abstract Class WP_Model
 {
 	protected $attributes = [];
+	protected $tax_data = [];
 	protected $data = [];
 	protected $booted = FALSE;
 
@@ -73,7 +74,7 @@ Abstract Class WP_Model
 
 		return TRUE;
 	}
-
+ 
 
 	/**
 	 * Loads data into the model
@@ -88,13 +89,13 @@ Abstract Class WP_Model
 			$this->content = $this->_post->post_content;
 
 			foreach($this->attributes as $attribute){
-				$this->data[$attribute] = $this->getMeta($attribute);
+				$this->set($attribute, $this->getMeta($attribute));
 			}
 		}
 
-		if(isset($this->taxonomies)){
+		if(!empty($this->taxonomies)){
 			foreach($this->taxonomies as $taxonomy){
-				$this->data[$taxonomy] = get_the_terms($this->ID, $taxonomy);
+				$this->tax_data[$taxonomy] = get_the_terms($this->ID, $taxonomy);
 			}
 		}
 
@@ -212,9 +213,13 @@ Abstract Class WP_Model
 	 * @param  property name $attribute [description]
 	 * @return requested property or NULL
 	 */
-	public function get($attribute)
+	public function get($attribute, $default = NULL)
 	{
-		return @$this->data[$attribute];
+		if(isset($this->data[$attribute])){
+			return $this->data[$attribute];
+		}
+
+		return $default;
 	}
 
 
@@ -259,7 +264,7 @@ Abstract Class WP_Model
 		}
 
 		if(in_array($attribute, $this->attributes)){
-			$this->data[$attribute] = $value;
+			$this->set($attribute, $value);
 		}
 	}
 
@@ -267,8 +272,8 @@ Abstract Class WP_Model
 	{
 		if(in_array($attribute, $this->attributes)){
 			return $this->get($attribute);
-		}if(in_array($attribute, $this->taxonomies)){
-			return $this->get($attribute);
+		}else if(in_array($attribute, $this->taxonomies)){
+			return $this->tax_data[$attribute];
 		}else if(method_exists($this, ('_get'. ucfirst($attribute)))){
 			return call_user_func([$this, ('_get'. ucfirst($attribute))]);
 		}else if(method_exists($this, $attribute)){
@@ -337,7 +342,7 @@ Abstract Class WP_Model
 	public static function findOrFail($ID)
 	{
 		if(!Self::exists($ID)){
-			throw new Exception("Post not found");
+			throw new Exception("Post {$ID} not found");
 		}
 
 		return Self::find($ID);
@@ -356,7 +361,7 @@ Abstract Class WP_Model
 			'posts_per_page' => $limit,
 		];
 
-		foreach (( new WP_Query($args) )->get_posts() as $key => $post){
+		foreach((new WP_Query($args))->get_posts() as $key => $post){
 			$return[] = Self::find($post->ID);
 		}
 
@@ -368,14 +373,16 @@ Abstract Class WP_Model
 	 * AB: needs work
 	 * This fires all() which is risky
 	 */
-	public static function asList($metaKey = NULL){
-		$self = get_called_class();
-		$posts = $self::all();
-		$return = [];
+	public static function asList($metaKey = NULL, $posts = FALSE){
+		if(!is_array($posts)){
+			$self = get_called_class();
+			$posts = $self::all();
+		}
 
+		$return = [];
 		foreach($posts as $post){
 			if(is_null($metaKey)){
-				$return[$post->ID] = $post;
+				$return[$post->ID] = $ ;
 			}if(in_array($metaKey, ['title', 'post_title'])){
 				$return[$post->ID] = $post->post_title;
 			}else{
@@ -396,21 +403,20 @@ Abstract Class WP_Model
 
 		$return = [];
 		$finderMethod = $finder.'Finder';
+		$self = get_called_class();
 
 		if(!in_array($finderMethod, array_column(( new ReflectionClass(get_called_class()) )->getMethods(), 'name'))){
-			throw new Exception("Finder not found");
+			throw new Exception("Finder method {$finderMethod} not found in ". $self::class);
 		}
 
-		$self = get_called_class();
-		$args = $self::$finderMethod();
 		
+		$args = $self::$finderMethod();
 		if(!is_array($args)){
-			throw new Exception("Finder Method must return an array");
+			throw new Exception("Finder method must return an array");
 		}
 
 		$args['post_type'] = Self::getName();
-
-		foreach (( new WP_Query($args) )->get_posts() as $key => $post){
+		foreach((new WP_Query($args))->get_posts() as $key => $post){
 			$return[] = Self::find($post->ID);
 		}
 
@@ -427,16 +433,27 @@ Abstract Class WP_Model
 	{
 		if(is_array($key)){
 			$params = [
-				'meta_query' => []
+				'post_type' => Self::getName(),
+				'meta_query' => [],
+				'tax_query' => [],
 			];
 
 			foreach($key as $meta){
-				$params['meta_query'][] = [
-					'key'       => $meta['key'],
-					'value'     => $meta['value'],
-					'compare'   => isset($meta['compare'])? $meta['compare'] : '=',
-					'type'      => isset($meta['type'])? $meta['type'] : 'CHAR'
-				];
+				if(!empty($meta['taxonomy'])){
+					$params['tax_query'][] = [
+						'taxonomy' => $meta['taxonomy'],
+                		'field'    => $meta['field'],
+                		'terms'    => $meta['terms'],
+                		'operator'    => isset($meta['operator'])? $meta['operator'] : 'IN',
+					];
+				}else{
+					$params['meta_query'][] = [
+						'key'       => $meta['key'],
+						'value'     => $meta['value'],
+						'compare'   => isset($meta['compare'])? $meta['compare'] : '=',
+						'type'      => isset($meta['type'])? $meta['type'] : 'CHAR'
+					];
+				}
 			}
 
 			$query = new WP_Query($params);
@@ -515,7 +532,7 @@ Abstract Class WP_Model
 		Self::addHooks();
 
 		foreach($this->attributes as $attribute){
-			$this->setMeta($attribute, ((@$this->data[$attribute] !== NULL)? $this->data[$attribute] : ''));
+			$this->setMeta($attribute, $this->get($attribute, ''));
 		}	
 
 		$this->setMeta('_id', $this->ID);
@@ -560,7 +577,7 @@ Abstract Class WP_Model
 
 		foreach($this->attributes as $attribute){
 			$this->deleteMeta($attribute);
-			$this->data[$attribute] = NULL;
+			$this->set($attribute, NULL);
 		}
 
 		$this->setMeta('_id', $this->ID);

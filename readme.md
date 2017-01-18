@@ -127,7 +127,7 @@ $allProducts = Product::all();
 The finder() method allows you to create a custom finder method.
 To create a custom finder first make a method in your model named your finders name and suffixed with 'Finder' this method must return an array. The array will be given directly to the constructer of a WP_Query. The results of the WP_Query will be returned by the finder() method.
 
-If you would like to post process the results of your custom finder you can add a 'PostFinder' method. This method must accept one argument which will be the array of posts.
+If you would like to post-process the results of your custom finder you can add a 'PostFinder' method. This method must accept one argument which will be the array of found posts.
 ```php
 
 Class Product extends WP_Model
@@ -152,7 +152,9 @@ Class Product extends WP_Model
     public function heavyPostFinder($results)
     {  
         return array_map(function($model){
-            return $model->color;
+            if($model->color == 'green'){
+                return $model->color;
+            }
         }, $results);
     }
 }
