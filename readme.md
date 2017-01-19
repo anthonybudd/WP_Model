@@ -78,7 +78,7 @@ Product::register([
 
 ***
 
-### Create and Save
+### Creating and saving models
 You can create a model using the following methods.
 ```php
 $product = new Product();
@@ -102,7 +102,7 @@ $product = Product::insert([
 
 ***
 
-### Find
+### Find()
 
 find() will return an instanciated model. If a post exists in the database with the ID of $id it's data will be loaded into the object.
 
@@ -124,7 +124,7 @@ all() will return all posts. Use with caution.
 $allProducts = Product::all();
 ```
 
-### In
+### In()
 
 To find multiple posts by ID you can us the in() method.
 
@@ -133,7 +133,7 @@ $firstProducts = Product::in(1, 2, 3, 4);
 $firstProducts = Product::in([1, 2, 3, 4]);
 ```
 
-### Where
+### Where()
 
 where() is a simple interface into WP_Query, the method can accept two string arguments (meta|_value and meta_key). For complex queries supply the method with a single array as the argument. The array will be automatically broken down into tax queries and meta queries, WP_Query will then be executed and will return an array of models.
 
@@ -194,13 +194,14 @@ $heavyProducts = Product::finder('heavy');
 
 ***
 
-### Delete
+### Delete()
 delete() will trash the post.
 ```php
 $product = Product::find(15);
 $product->delete();
 ```
 
+### hardDelete()
 hardDelete() will delete the post's r the post and set all of it's meta (in the database and in the object) to NULL.
 ```php
 $product->hardDelete();
