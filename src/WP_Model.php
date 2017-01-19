@@ -17,7 +17,7 @@ Abstract Class WP_Model implements JsonSerializable
 	protected $tax_data = [];
 	protected $data = [];
 	protected $booted = FALSE;
-
+	public $new = TRUE;
 	public $dirty = FALSE;
 	public $ID = FALSE;
 	public $prefix = '';
@@ -83,6 +83,7 @@ Abstract Class WP_Model implements JsonSerializable
 		$this->triggerEvent('booting');
 
 		if(!empty($this->ID)){
+			$this->new = FALSE;
 			$this->_post = get_post($this->ID);
 			$this->title = $this->_post->post_title;
 			$this->content = $this->_post->post_content;
@@ -101,7 +102,7 @@ Abstract Class WP_Model implements JsonSerializable
 			}
 		}
 
-		$this->booted = true;
+		$this->booted = TRUE;
 		$this->triggerEvent('booted');
 	}
 
@@ -130,7 +131,7 @@ Abstract Class WP_Model implements JsonSerializable
 		$postTypeName = Self::getName();
 
 		$defualts = [
-			'public' => true,
+			'public' => TRUE,
 			'label' => ucfirst($postTypeName)
 		];
 
@@ -326,17 +327,6 @@ Abstract Class WP_Model implements JsonSerializable
 		}
 	}
 
-	//-----------------------------------------------------
-	// RELATIONSHIPS 
-	//-----------------------------------------------------
-	public static function hasMany($model, $forignKey, $localKey)
-	{
-		if(in_array($localKey, ['id', 'ID', 'post_id'])){
-			$localKey = '_id';
-		}
-		return $model::where($forignKey, $this->get($localKey));
-	}
-
 
 	//-----------------------------------------------------
 	// FINDERS
@@ -483,7 +473,7 @@ Abstract Class WP_Model implements JsonSerializable
 				if(!empty($meta['taxonomy'])){
 					$params['tax_query'][] = [
 						'taxonomy' => $meta['taxonomy'],
-                		'field'    => $meta['field'],
+                		'field'    => isset($meta['field'])? $meta['field'] : 'slug',
                 		'terms'    => $meta['terms'],
                 		'operator'    => isset($meta['operator'])? $meta['operator'] : 'IN',
 					];
@@ -579,6 +569,7 @@ Abstract Class WP_Model implements JsonSerializable
 		$this->setMeta('_id', $this->ID);
 		$this->triggerEvent('saved');
 		$this->dirty = FALSE;
+		$this->new = FALSE;
 		return $this;
 	}
 

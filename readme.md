@@ -102,6 +102,117 @@ $product = Product::insert([
 
 ***
 
+### Find
+
+find() will return an instanciated model. If a post exists in the database with the ID of $id it's data will be loaded into the object.
+
+```php
+$product = Product::find(15);
+```
+
+findorFail() will throw an exception if a post of the correct type cannot be found in the database.
+```php
+try {
+    $product = Product::findorFail(15);
+} catch (Exception $e) {
+    echo "Product not found.";
+}
+```
+
+all() will return all posts. Use with caution.
+```php
+$allProducts = Product::all();
+```
+
+### In
+
+To find multiple posts by ID you can us the in() method.
+
+```php
+$firstProducts = Product::in(1, 2, 3, 4);
+$firstProducts = Product::in([1, 2, 3, 4]);
+```
+
+### Where
+
+where() is a simple interface into WP_Query, the method can accept two string arguments (meta|_value and meta_key). For complex queries supply the method with a single array as the argument. The array will be automatically broken down into tax queries and meta queries, WP_Query will then be executed and will return an array of models.
+
+```php
+$greenProducts = Product::where('color', 'green');
+
+$otherProducts = Product::where([
+    [
+        'key' => 'color',
+        'value' => 'green',
+        'compare' => '!='
+    ],[
+        'taxonomy' => 'category',
+        'terms' => ['home', 'garden']
+    ]
+]);
+```
+
+### Custom Finders
+
+The finder() method allows you to create a custom finder method.
+To create a custom finder first make a method in your model named your finders name and suffixed with 'Finder' this method must return an array. The array will be given directly to the constructer of a WP_Query. The results of the WP_Query will be returned by the finder() method.
+
+If you would like to post-process the results of your custom finder you can add a 'PostFinder' method. This method must accept one argument which will be the array of found posts.
+```php
+
+Class Product extends WP_Model
+{
+    ...
+
+    public function heavyFinder()
+    {  
+        return [
+            'meta_query' => [
+                [
+                    'key' => 'weight',
+                    'compare' => '>',
+                    'type' => 'NUMERIC',
+                    'weight' => '1000'
+                ]
+            ]
+        ];
+    }
+
+    // Optional
+    public function heavyPostFinder($results)
+    {  
+        return array_map(function($model){
+            if($model->color == 'green'){
+                return $model->color;
+            }
+        }, $results);
+    }
+}
+
+$heavyProducts = Product::finder('heavy');
+```
+
+***
+
+### Delete
+delete() will trash the post.
+```php
+$product = Product::find(15);
+$product->delete();
+```
+
+hardDelete() will delete the post's r the post and set all of it's meta (in the database and in the object) to NULL.
+```php
+$product->hardDelete();
+```
+
+restore() will unTrash the post and restore the model. You cannot restore hardDeleted models.
+```php
+$product = Product::restore(15);
+```
+
+***
+
 ### Virtual Properties
 If you would like to add virtual properties to your models, you can do this by adding a method named the virtual property's name prefixed with '_get'
 
@@ -167,87 +278,6 @@ Result:
 ***
 
 
-### Find
-find() will return an instanciated model. If a post exists in the database with the ID of $id it's data will be loaded into the object.
-```php
-$product = Product::find(15);
-```
-
-findorFail() will throw an exception if a post of the correct type cannot be found in the database.
-```php
-try {
-    $product = Product::findorFail(15);
-} catch (Exception $e) {
-    echo "Product not found.";
-}
-```
-
-all() will return all posts. Use with caution.
-```php
-$allProducts = Product::all();
-```
-
-### Custom Finders
-
-The finder() method allows you to create a custom finder method.
-To create a custom finder first make a method in your model named your finders name and suffixed with 'Finder' this method must return an array. The array will be given directly to the constructer of a WP_Query. The results of the WP_Query will be returned by the finder() method.
-
-If you would like to post-process the results of your custom finder you can add a 'PostFinder' method. This method must accept one argument which will be the array of found posts.
-```php
-
-Class Product extends WP_Model
-{
-    ...
-
-    public function heavyFinder()
-    {  
-        return [
-            'meta_query' => [
-                [
-                    'key' => 'weight',
-                    'compare' => '>',
-                    'type' => 'NUMERIC',
-                    'weight' => '1000'
-                ]
-            ]
-        ];
-    }
-
-    // Optional
-    public function heavyPostFinder($results)
-    {  
-        return array_map(function($model){
-            if($model->color == 'green'){
-                return $model->color;
-            }
-        }, $results);
-    }
-}
-
-$heavyProducts = Product::finder('heavy');
-```
-
-***
-
-### Delete
-delete() will trash the post.
-```php
-$product = Product::find(15);
-$product->delete();
-```
-
-hardDelete() will delete the post's r the post and set all of it's meta (in the database and in the object) to NULL.
-```php
-$product->hardDelete();
-```
-
-restore() will unTrash the post and restore the model. You cannot restore hardDeleted models.
-```php
-$product = Product::restore(15);
-```
-
-***
-
 ### Events
 WP_Model has an events system, this is the best way to hook into WP_Model's core functions. All events with the suffix -ing fire as soon as the method has been called. All events with the suffix -ed will be fired at the very end of the method. Below is a list of available events. All events will be supplied with the model that triggered the event
 
@@ -304,11 +334,31 @@ Product::patchable();
 
 ***
 
+### Helper Properties
+
+The $new property will return true if the model has not been saved in the Database yet.
+
+The $dirty property will return true if the data in the model is different from what's currently stored in the database.
+
+
+```php
+$product = new Product;
+$product->new; // Returns (bool) true
+
+$product = Product::find(15);
+$product->new; // Returns (bool) false
+
+$product->color = 'red';
+$product->dirty; // Returns (bool) true
+$product->save();
+$product->dirty; // Returns (bool) false
+
+```
+
 ### Helper Methods
 
 ```php
-Product::exists(15); // True or False
-
+Product::exists(15); // Returns (bool) true or false
 
 $product->post() // Returns WP_Post object
 
@@ -316,19 +366,19 @@ $product->featuredImage() // Returns featured image URL
 
 $product->toArray() // Returns an array representaion of the model
 
-Product::asList() // Returns array of posts keyed by post id
+Product::asList() // Returns array of posts keyed by the post's ID
 [
-    15 => Product
-    16 => Product
+    15 => Product,
+    16 => Product,
     17 => Product
 ]
 
 // You can also specify the value of each element in the array to be meta from the model.
-Product::asList('weight')
+Product::asList('post_title')
 [
-    15 => "250"
-    16 => "100"
-    17 => "95"
+    15 => "Product 1",
+    16 => "Product 2",
+    17 => "Product 3"
 ]
 ```
 
@@ -338,3 +388,4 @@ Product::asList('weight')
 ### Todos
 
  - Support data types: Array, Integer, Date
+ - Update taxonomy support
