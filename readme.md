@@ -172,7 +172,7 @@ Class Product extends WP_Model
                     'key' => 'weight',
                     'compare' => '>',
                     'type' => 'NUMERIC',
-                    'weight' => '1000'
+                    'value' => '1000'
                 ]
             ]
         ];
@@ -282,6 +282,8 @@ Result:
 ### Events
 WP_Model has an events system, this is the best way to hook into WP_Model's core functions. All events with the suffix -ing fire as soon as the method has been called. All events with the suffix -ed will be fired at the very end of the method. Below is a list of available events. All events will be supplied with the model that triggered the event
 
+You can also trigger the save, insert and delete events from the admin section of wordpress.
+
 - booting
 - booted
 - saving
@@ -359,11 +361,13 @@ $product->dirty; // Returns (bool) false
 ### Helper Methods
 
 ```php
+Product::single(); // Returns the current model if on a single page or in the loop
+
 Product::exists(15); // Returns (bool) true or false
 
 $product->post() // Returns WP_Post object
 
-$product->featuredImage() // Returns featured image URL
+$product->featuredImage($defaultURL) // Returns featured image URL
 
 $product->toArray() // Returns an array representaion of the model
 
@@ -390,3 +394,4 @@ Product::asList('post_title')
 
  - Support data types: Array, Integer, Date
  - Update taxonomy support
+ - Test admin event triggering

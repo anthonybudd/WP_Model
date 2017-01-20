@@ -251,9 +251,10 @@ Abstract Class WP_Model implements JsonSerializable
 		return new $class();
 	}
 
-	public function featuredImage()
+	public function featuredImage($default = '')
 	{
-		return get_the_post_thumbnail_url($this->ID);
+		$featuredImage = get_the_post_thumbnail_url($this->ID);
+		return ($featuredImage !== FALSE)? $featuredImage : $default;
 	}
 
 	public function jsonSerialize()
@@ -291,6 +292,9 @@ Abstract Class WP_Model implements JsonSerializable
 	}
 
 
+	public function single(){
+		return Self::find(get_the_ID());
+	}
 
 
 	//-----------------------------------------------------
