@@ -235,10 +235,14 @@ Abstract Class WP_Model implements JsonSerializable
 		$this->data[$attribute] = $value;
 	}
 
-	public function getTaxonomy($attribute, $param = 'name')
+	public function getTaxonomy($attribute, $param = NULL)
 	{
 		if(isset($this->taxonomies) && isset($this->tax_data[$attribute])){
 			return array_map(function($tax) use ($param){
+				if(is_null($param)){
+					return $tax;
+				}
+
 				return $tax->$param;
 			}, $this->tax_data[$attribute]);
 		}
@@ -402,7 +406,7 @@ Abstract Class WP_Model implements JsonSerializable
 		if(in_array($attribute, $this->attributes)){
 			return $this->get($attribute);
 		}else if(isset($this->taxonomies) && in_array($attribute, $this->taxonomies)){
-			return $this->getTaxonomy($attribute);
+			return $this->getTaxonomy($attribute, 'name');
 		}else if($this->isVirtualProperty($attribute)){
 			return $this->getVirtualProperty($attribute);
 		}else if($attribute === 'post_title'){
