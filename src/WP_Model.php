@@ -169,8 +169,11 @@ Abstract Class WP_Model implements JsonSerializable
 	 */
 	public static function getPostType()
 	{
-		$class = get_called_class();
-		return ( new ReflectionClass($class) )->getProperty('postType')->getValue( (new $class) );
+		$new = Self::newInstance();
+		if(isset($new->postType)){
+			return $new->postType;
+		}
+		return $new->name;
 	}
 
 	/**
@@ -368,7 +371,7 @@ Abstract Class WP_Model implements JsonSerializable
 	 * Get the model for a single page or in the loop
 	 * @return Model | NULL
 	 */
-	public function single()
+	public static function single()
 	{
 		return Self::find(get_the_ID());
 	}
