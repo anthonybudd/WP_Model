@@ -16,7 +16,8 @@ Class Product extends WP_Model
 Product::register();
 
 $book = new Product;
-$book->color = 'Green';
+$book->title = 'WordPress for dummies';
+$book->color = 'Yellow';
 $book->weight = 100;
 $book->save();
 
@@ -32,7 +33,7 @@ Require WP_Model with composer
 $ composer require anthonybudd/WP_Model
 ```
 
-#### Or (not recommend)
+#### Or
 
 Download the WP_Model class and require it at the top of your functions.php file.
 
@@ -104,13 +105,14 @@ $product = Product::insert([
 
 ### Find()
 
-find() will return an instanciated model. If a post exists in the database with the ID of $id it's data will be loaded into the object.
+find() will return an instanciated model if a post exists in the database with the ID.
 
 ```php
 $product = Product::find(15);
 ```
 
 findorFail() will throw an exception if a post of the correct type cannot be found in the database.
+
 ```php
 try {
     $product = Product::findorFail(15);
@@ -119,7 +121,10 @@ try {
 }
 ```
 
+### All()
+
 all() will return all posts. Use with caution.
+
 ```php
 $allProducts = Product::all();
 ```
@@ -158,6 +163,7 @@ The finder() method allows you to create a custom finder method.
 To create a custom finder first make a method in your model named your finders name and suffixed with 'Finder' this method must return an array. The array will be given directly to the constructer of a WP_Query. The results of the WP_Query will be returned by the finder() method.
 
 If you would like to post-process the results of your custom finder you can add a 'PostFinder' method. This method must accept one argument which will be the array of found posts.
+
 ```php
 
 Class Product extends WP_Model
@@ -196,6 +202,7 @@ $heavyProducts = Product::finder('heavy');
 
 ### Delete()
 delete() will trash the post.
+
 ```php
 $product = Product::find(15);
 $product->delete();
@@ -203,11 +210,13 @@ $product->delete();
 
 ### hardDelete()
 hardDelete() will delete the post's r the post and set all of it's meta (in the database and in the object) to NULL.
+
 ```php
 $product->hardDelete();
 ```
 
 restore() will unTrash the post and restore the model. You cannot restore hardDeleted models.
+
 ```php
 $product = Product::restore(15);
 ```
@@ -298,6 +307,7 @@ You can also trigger the save, insert and delete events from the admin section o
 - patched
 
 When saving a new model the saving, inserting, inserted and saved events are all fired (in that order).
+
 ```php
 Class Product extends WP_Model
 {
@@ -356,6 +366,11 @@ $product->dirty; // Returns (bool) true
 $product->save();
 $product->dirty; // Returns (bool) false
 
+$product->title; // Post title
+
+$product->content; // Post content
+
+
 ```
 
 ### Helper Methods
@@ -364,6 +379,10 @@ $product->dirty; // Returns (bool) false
 Product::single(); // Returns the current model if on a single page or in the loop
 
 Product::exists(15); // Returns (bool) true or false
+
+$product->get($attribute, $default) // Get attribute from the model
+
+$product->set($attribute, $value) // Set attribute of the model
 
 $product->post() // Returns WP_Post object
 
@@ -393,5 +412,5 @@ Product::asList('post_title')
 ### Todos
 
  - Support data types: Array, Integer, Date
- - Update taxonomy support
+ - Improve taxonomy support
  - Test admin event triggering
