@@ -6,9 +6,6 @@
  * A simple class for creating active
  * record, eloquent-esque models of WordPress Posts.
  *
- * @todo
- * - Document Funtions
- * - Support data types: Array, Integer
  * @author     AnthonyBudd <anthonybudd94@gmail.com>
  */
 Abstract Class WP_Model implements JsonSerializable
@@ -116,14 +113,14 @@ Abstract Class WP_Model implements JsonSerializable
 			}
 		}
 
-		$postTypeName = Self::getName();
+		$postType = Self::getPostType();
 
 		$defualts = [
 			'public' => TRUE,
-			'label' => ucfirst($postTypeName)
+			'label' => ucfirst($postType)
 		];
 
-		register_post_type($postTypeName, array_merge($defualts, $args));
+		register_post_type($postType, array_merge($defualts, $args));
 
 		Self::addHooks();
 
@@ -170,10 +167,10 @@ Abstract Class WP_Model implements JsonSerializable
 	 * Get the name propery of the inherited class.
 	 * @return String
 	 */
-	public static function getName()
+	public static function getPostType()
 	{
 		$class = get_called_class();
-		return ( new ReflectionClass($class) )->getProperty('name')->getValue( (new $class) );
+		return ( new ReflectionClass($class) )->getProperty('postType')->getValue( (new $class) );
 	}
 
 	/**
@@ -235,6 +232,21 @@ Abstract Class WP_Model implements JsonSerializable
 		$this->data[$attribute] = $value;
 	}
 
+	public function getTaxonomy($attribute, $param = 'name')
+	{
+		if(isset($this->taxonomies) && isset($this->tax_data[$attribute])){
+			return array_map(function($tax) use ($param){
+				return $tax->$param;
+			}, $this->tax_data[$attribute]);
+		}
+
+		return [];
+	}
+
+	/**
+	 * NOT DONE
+	 * $value can be array of id's (ints) or array of slugs
+	 */
 	public function setTaxonomy($attribute, $value)
 	{
 		if(isset($this->taxonomies[$attribute])){
@@ -246,20 +258,27 @@ Abstract Class WP_Model implements JsonSerializable
 		}
 	}
 
-	public function getTaxonomy($attribute, $default = NULL)
+	/**
+	 * NOT DONE
+	 */
+	public function removeTaxonomy($attribute, $value)
 	{
-		if(isset($this->taxonomies) && isset($this->tax_data[$attribute])){
-			return $this->tax_data[$attribute];
+		if(isset($this->taxonomies[$attribute])){
+			if(is_int($value)){
+				$term = get_term_by('id', $attribute, $value);
+			}else{
+				$term = get_term_by('name', $attribute, $value);
+			}
 		}
-
-		return $default;
 	}
 
-	public function hasVirtualProperty($attribute){
+	public function isVirtualProperty($attribute)
+	{
 		return method_exists($this, ('_get'. ucfirst($attribute)));
 	}
 
-	public function getVirtualProperty(){
+	public function getVirtualProperty($attribute)
+	{
 		return call_user_func([$this, ('_get'. ucfirst($attribute))]);  
 	}
 
@@ -277,7 +296,7 @@ Abstract Class WP_Model implements JsonSerializable
 		if($type){
 			if(
 				(get_post_status($id) !== FALSE) &&
-				(get_post_type($id) == Self::getName())){
+				(get_post_type($id) == Self::getPostType())){
 				return TRUE;
 			}
 		}else{
@@ -294,6 +313,11 @@ Abstract Class WP_Model implements JsonSerializable
 	public function post()
 	{
 		return $this->_post;
+	}
+
+	public function hasFeaturedImage()
+	{
+		return (get_the_post_thumbnail_url($this->ID) !== FALSE)? TRUE : FALSE;
 	}
 
 	/**
@@ -344,8 +368,14 @@ Abstract Class WP_Model implements JsonSerializable
 	 * Get the model for a single page or in the loop
 	 * @return Model | NULL
 	 */
-	public function single(){
+	public function single()
+	{
 		return Self::find(get_the_ID());
+	}
+
+	public function permalink()
+	{
+		return get_permalink($this->ID);
 	}
 
 	// -----------------------------------------------------
@@ -370,7 +400,7 @@ Abstract Class WP_Model implements JsonSerializable
 			return $this->get($attribute);
 		}else if(isset($this->taxonomies) && in_array($attribute, $this->taxonomies)){
 			return $this->getTaxonomy($attribute);
-		}else if($this->hasVirtualProperty($attribute)){
+		}else if($this->isVirtualProperty($attribute)){
 			return $this->getVirtualProperty($attribute);
 		}else if($attribute === 'post_title'){
 			return $this->title;
@@ -439,7 +469,7 @@ Abstract Class WP_Model implements JsonSerializable
 	{
 		$return = [];
 		$args = [
-			'post_type' 	 => Self::getName(),
+			'post_type' 	 => Self::getPostType(),
 			'posts_per_page' => $limit,
 			'order'          => 'DESC',
 			'orderby'        => 'id',
@@ -498,7 +528,7 @@ Abstract Class WP_Model implements JsonSerializable
 			throw new Exception("Finder method must return an array");
 		}
 
-		$args['post_type'] = Self::getName();
+		$args['post_type'] = Self::getPostType();
 		foreach((new WP_Query($args))->get_posts() as $key => $post){
 			$return[] = Self::find($post->ID);
 		}
@@ -515,7 +545,7 @@ Abstract Class WP_Model implements JsonSerializable
 	{
 		if(is_array($key)){
 			$params = [
-				'post_type' => Self::getName(),
+				'post_type' => Self::getPostType(),
 				'meta_query' => [],
 				'tax_query' => [],
 			];
@@ -541,7 +571,7 @@ Abstract Class WP_Model implements JsonSerializable
 			$query = new WP_Query($params);
 		}else{
 			$query = new WP_Query([
-				'post_type' => Self::getName(),
+				'post_type' => Self::getPostType(),
 				'meta_query'        => [
 					[
 						'key'       => $key,
@@ -588,7 +618,7 @@ Abstract Class WP_Model implements JsonSerializable
 		$this->triggerEvent('saving');
 
 		$overwrite = [
-			'post_type' => $this->name
+			'post_type' => Self::getPostType()
 		];
 
 		Self::removeHooks();
@@ -630,13 +660,15 @@ Abstract Class WP_Model implements JsonSerializable
 	// -----------------------------------------------------
 	// DELETE
 	// -----------------------------------------------------
-	public function delete(){
+	public function delete()
+	{
 		$this->triggerEvent('deleting');
 		wp_trash_post($this->ID);
 		$this->triggerEvent('deleted');
 	}
 
-	public function hardDelete(){
+	public function hardDelete()
+	{
 		$this->triggerEvent('hardDeleting');
 
 		$defualts = [
@@ -668,7 +700,7 @@ Abstract Class WP_Model implements JsonSerializable
 	//-----------------------------------------------------
 	public static function patchable($method = FALSE)
 	{
-		if(isset($_REQUEST['_model']) &&$_REQUEST['_model'] === Self::getName()){
+		if(isset($_REQUEST['_model']) &&$_REQUEST['_model'] === Self::getPostType()){
 
 			if(isset($_REQUEST['_id'])){
 				$model = Self::find($_REQUEST['_id']);

@@ -6,7 +6,7 @@
 
 Class Product extends WP_Model
 {
-    public $name = 'product';
+    public $postType = 'product';
     public $attributes = [
         'color',
         'weight'
@@ -22,6 +22,15 @@ $book->weight = 100;
 $book->save();
 
 ```
+
+***
+
+### Features
+
+* Intuitive Active Record ORM
+* Event System
+* Custom Finders
+
 
 ***
 
@@ -44,7 +53,7 @@ Download the WP_Model class and require it at the top of your functions.php file
 ***
 
 ### Setup
-You will then need to make a class that extends WP_Model. This class will need the public property $name (this will be the post type) and $attributes, an array of strings.
+You will then need to make a class that extends WP_Model. This class will need the public property $postType and $attributes, an array of strings.
 
 If you would like to have any taxonomies loaded into the model, add the optional parameter $taxonomies (array of taxonomy slugs) to the class.
 
@@ -52,12 +61,15 @@ If you need to prefix the model's data in your post_meta table add a public prop
 ```php
 Class Product extends WP_Model
 {
-    public $name = 'product';
+    public $postType = 'product';
+
     public $prefix = 'wp_model_';
+
     public $attributes = [
         'color',
         'weight'
     ];
+
     public $taxonomies = [
         'category',
     ];
@@ -105,7 +117,7 @@ $product = Product::insert([
 
 ### Find()
 
-find() will return an instanciated model if a post exists in the database with the ID.
+find() will return an instanciated model if a post exists in the database with the ID if a post cannot be found it will retur NULL.
 
 ```php
 $product = Product::find(15);
@@ -386,6 +398,10 @@ $product->set($attribute, $value) // Set attribute of the model
 
 $product->post() // Returns WP_Post object
 
+$product->permalink() // Returns post permalink
+
+$product->hasFeaturedImage($defaultURL) // Returns TRUE if a featured image has been set or FALSE if not
+
 $product->featuredImage($defaultURL) // Returns featured image URL
 
 $product->toArray() // Returns an array representaion of the model
@@ -411,6 +427,5 @@ Product::asList('post_title')
 
 ### Todos
 
- - Support data types: Array, Integer, Date
  - Improve taxonomy support
  - Test admin event triggering
