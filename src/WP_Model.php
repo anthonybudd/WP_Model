@@ -48,14 +48,6 @@ Abstract Class WP_Model implements JsonSerializable
 	}
 
 	/**
-	 * Create a new instace with data and save
-	 * @param Array $insert Asoc array of data to start the instace with
-	 */
-	public static function insert(Array $insert = []){
-		return Self::newInstance($insert)->save();
-	}
-
-	/**
 	 * Loads data into the model
 	 */
 	protected function boot()
@@ -86,17 +78,6 @@ Abstract Class WP_Model implements JsonSerializable
 		$this->triggerEvent('booted');
 	}
 
-	/**
-	 * Fire event if the event method exists
-	 * @param  String $event event name
-	 * @return Boolean
-	 */
-	protected function triggerEvent($event)
-	{
-		if(method_exists($this, $event)){
-			$this->$event($this);
-		}
-	}
 
 	/**
 	 * Register the post type using the name
@@ -125,6 +106,30 @@ Abstract Class WP_Model implements JsonSerializable
 		Self::addHooks();
 
 		return TRUE;
+	}
+
+	/**
+	 * Create a new instace with data and save
+	 * @param Array $insert Asoc array of data to start the instace with
+	 */
+	public static function insert(Array $insert = []){
+		return Self::newInstance($insert)->save();
+	}
+
+	// -----------------------------------------------------
+	// EVENTS
+	// -----------------------------------------------------
+
+	/**
+	 * Fire event if the event method exists
+	 * @param  String $event event name
+	 * @return Boolean
+	 */
+	protected function triggerEvent($event)
+	{
+		if(method_exists($this, $event)){
+			$this->$event($this);
+		}
 	}
 
 	// -----------------------------------------------------
@@ -416,7 +421,7 @@ Abstract Class WP_Model implements JsonSerializable
 		}
 	}
 
-	//-----------------------------------------------------
+	// ----------------------------------------------------
 	// FINDERS
 	// ----------------------------------------------------
 	/**
@@ -684,7 +689,7 @@ Abstract Class WP_Model implements JsonSerializable
 			'post_content' => '',
 		];
 
-		wp_update_post(array_merge($defualts, $args, $overwrite));
+		wp_update_post($defualts);
 
 		foreach($this->attributes as $attribute){
 			$this->deleteMeta($attribute);
@@ -702,9 +707,9 @@ Abstract Class WP_Model implements JsonSerializable
 		return Self::find($ID);
 	}
 
-	//-----------------------------------------------------
+	// -----------------------------------------------------
 	// PATCHING 
-	//-----------------------------------------------------
+	// -----------------------------------------------------
 	public static function patchable($method = FALSE)
 	{
 		if(isset($_REQUEST['_model']) &&$_REQUEST['_model'] === Self::getPostType()){
