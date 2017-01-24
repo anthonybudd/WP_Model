@@ -407,7 +407,7 @@ Abstract Class WP_Model implements JsonSerializable
 			return $this->get($attribute);
 		}else if(isset($this->taxonomies) && in_array($attribute, $this->taxonomies)){
 			return $this->getTaxonomy($attribute, 'name');
-		}else if($this->isVirtualProperty($attribute)){
+		}else if(isset($this->virtual) && in_array($attribute, $this->virtual) && $this->isVirtualProperty($attribute)){
 			return $this->getVirtualProperty($attribute);
 		}else if($attribute === 'post_title'){
 			return $this->title;

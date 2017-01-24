@@ -244,6 +244,10 @@ Class Product extends WP_Model
 {
     ...
 
+    public $virtual = [
+        'humanWeight'
+    ];
+
     public function _getHumanWeight()
     {  
         return $this->weight . 'Kg';
