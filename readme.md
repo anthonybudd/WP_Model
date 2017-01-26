@@ -486,11 +486,3 @@ Product::asList('post_title')
     17 => "Product 3"
 ]
 ```
-
-
-***
-
-### Todos
-
- - Improve taxonomy support
- - Test admin event triggering
