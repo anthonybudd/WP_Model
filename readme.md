@@ -30,6 +30,7 @@ $book->save();
 * Intuitive Active Record ORM
 * Event System
 * Custom Finders
+* Useful Helpers
 
 
 ***
