@@ -11,12 +11,14 @@
 Abstract Class WP_Model implements JsonSerializable
 {
 	protected $attributes = [];
+	protected $taxonomies = [];
+	protected $default = [];
 	protected $tax_data = [];
 	protected $data = [];
 	protected $booted = FALSE;
 	public $new = TRUE;
 	public $dirty = FALSE;
-	public $ID = FALSE;
+	public $ID;
 	public $prefix = '';
 	public $title;
 	public $content;
@@ -28,27 +30,42 @@ Abstract Class WP_Model implements JsonSerializable
 	 * @param Array $insert Asoc array of data to start the instace with
 	 */
 	public function __construct(Array $insert = [])
-	{  
-		if(count($insert) !== 0){
-			foreach($insert as $attribute => $value){
-				if(in_array($attribute, array_merge($this->attributes, ['title', 'content']))){
-					$this->set($attribute, $value);
+	{ 	
+		if(!empty($this->default)){
+			foreach($this->default as $attribute => $value){
+				$this->data[$attribute] = $value;
+			}
+		}
+
+		foreach($insert as $attribute => $value){
+			if(in_array($attribute, $this->attributes)){
+				$this->set($attribute, $value);
+			}
+			
+			if(!empty($this->taxonomies)){
+				if(in_array($attribute, $this->taxonomies)){
+					if(is_array($value)){
+						$this->addTaxonomies($attribute, $value);
+					}else{
+						$this->addTaxonomy($attribute, $value);
+					}
 				}
 			}
+		}
 
-			if(!empty($insert['title'])){
-				$this->title = $insert['title'];
-			}
-			if(!empty($insert['content'])){
-				$this->content = $insert['content'];
-			}
+		if(!empty($insert['title'])){
+			$this->title = $insert['title'];
+		}
+
+		if(!empty($insert['content'])){
+			$this->content = $insert['content'];
 		}
 
 		$this->boot();
 	}
 
 	/**
-	 * Loads data into the model
+	 * Load data into the model
 	 */
 	protected function boot()
 	{
@@ -61,15 +78,21 @@ Abstract Class WP_Model implements JsonSerializable
 			$this->content = $this->_post->post_content;
 
 			foreach($this->attributes as $attribute){
-				$this->set($attribute, $this->getMeta($attribute));
+				$meta = $this->getMeta($attribute);
+				if($meta === '' && isset($this->default[$attribute])){
+					$this->set($attribute, $this->default[$attribute]);
+				}else{
+					$this->set($attribute, $meta);
+				}
 			}
-		}
 
-		if(!empty($this->taxonomies)){
-			foreach($this->taxonomies as $taxonomy){
-				$this->tax_data[$taxonomy] = get_the_terms($this->ID, $taxonomy);
-				if($this->tax_data[$taxonomy] === FALSE){
-					$this->tax_data[$taxonomy] = [];
+			if(!empty($this->taxonomies)){
+				foreach($this->taxonomies as $taxonomy){
+					$this->tax_data[$taxonomy] = get_the_terms($this->ID, $taxonomy);
+
+					if($this->tax_data[$taxonomy] === FALSE){
+						$this->tax_data[$taxonomy] = [];
+					}
 				}
 			}
 		}
@@ -87,13 +110,6 @@ Abstract Class WP_Model implements JsonSerializable
 	 */
 	public static function register($args = [])
 	{
-		$check = Self::newInstance();
-		foreach($check->attributes as $attribute){	
-			if(in_array($attribute, ['new', 'dirty', '_id', 'ID', 'prefix', 'title', 'content', '_post'])){
-				throw new Exception("The attribute name: {$attribute}, is reserved for WP_Model");
-			}
-		}
-
 		$postType = Self::getPostType();
 
 		$defualts = [
@@ -174,11 +190,17 @@ Abstract Class WP_Model implements JsonSerializable
 	 */
 	public static function getPostType()
 	{
-		$new = Self::newInstance();
-		if(isset($new->postType)){
-			return $new->postType;
+		$class = get_called_class();
+		$reflection = new ReflectionClass($class);
+		$model = $reflection->newInstanceWithoutConstructor();
+
+		if(isset($model->postType)){
+			return $model->postType;
+		}elseif(isset($model->name)){
+			return $model->name;
 		}
-		return $new->name;
+
+		throw new Exception('$postType not set');
 	}
 
 	/**
@@ -244,11 +266,11 @@ Abstract Class WP_Model implements JsonSerializable
 	{
 		if(isset($this->taxonomies) && isset($this->tax_data[$attribute])){
 			return array_map(function($tax) use ($param){
-				if(is_null($param)){
-					return $tax;
+				if(!is_null($param)){
+					return $tax->$param;
 				}
 
-				return $tax->$param;
+				return $tax;
 			}, $this->tax_data[$attribute]);
 		}
 
@@ -259,14 +281,35 @@ Abstract Class WP_Model implements JsonSerializable
 	 * NOT DONE
 	 * $value can be array of id's (ints) or array of slugs
 	 */
-	public function setTaxonomy($attribute, $value)
+	public function addTaxonomy($taxonomy, $value)
 	{
-		if(isset($this->taxonomies[$attribute])){
-			if(is_int($value)){
-				$term = get_term_by('id', $attribute, $value);
-			}else{
-				$term = get_term_by('name', $attribute, $value);
+		$term;
+		if(is_int($value)){
+			$term = get_term_by('id', $value, $taxonomy);
+		}elseif(is_string($value)){
+			$term = get_term_by('slug', $value, $taxonomy);
+		}
+
+		if(!empty($term)){
+			if(empty($this->tax_data[$taxonomy])){
+				$this->tax_data[$taxonomy] = [];
 			}
+
+			$this->tax_data[$taxonomy][] = $term;
+		}else{
+			return FALSE;
+		}
+	}
+
+	/**
+	 * NOT DONE
+	 * $value can be array of id's (ints) or array of slugs
+	 */
+	public function addTaxonomies($attribute, Array $taxonomies)
+	{
+		$this->tax_data[$attribute] = [];
+		foreach($taxonomies as $taxonomy){
+			$this->addTaxonomy($attribute, $taxonomy);
 		}
 	}
 
@@ -275,13 +318,33 @@ Abstract Class WP_Model implements JsonSerializable
 	 */
 	public function removeTaxonomy($attribute, $value)
 	{
-		if(isset($this->taxonomies[$attribute])){
-			if(is_int($value)){
-				$term = get_term_by('id', $attribute, $value);
-			}else{
-				$term = get_term_by('name', $attribute, $value);
+		$taxonomies = [];
+		if(!empty($this->tax_data[$attribute])){
+			foreach($this->tax_data[$attribute] as $tax){
+				if(is_int($value)){
+					if($tax->term_id !== $value){
+						$taxonomies[] = $tax;
+					}
+				}elseif(is_string($value)){
+					if($tax->slug !== $value){
+						$taxonomies[] = $tax;
+					}
+				}
 			}
+
+			$this->tax_data[$attribute] = $taxonomies;
 		}
+	}
+
+	public function removeTaxonomies($attribute, Array $taxonomies)
+	{
+		foreach($taxonomies as $taxonomy){
+			$this->removeTaxonomy($attribute, $taxonomy);
+		}
+	}
+
+	public function clearTaxonomies($taxonomy){
+		$this->addTaxonomies($taxonomy, []);
 	}
 
 	public function isVirtualProperty($attribute)
@@ -658,6 +721,12 @@ Abstract Class WP_Model implements JsonSerializable
 
 		Self::addHooks();
 
+		if(!empty($this->taxonomies)){
+			foreach($this->taxonomies as $taxonomy) {
+				wp_set_post_terms($this->ID, $this->getTaxonomy($taxonomy, 'term_id'), $taxonomy);
+			}
+		}
+
 		foreach($this->attributes as $attribute){
 			$this->setMeta($attribute, $this->get($attribute, ''));
 		}	
@@ -712,7 +781,7 @@ Abstract Class WP_Model implements JsonSerializable
 	// -----------------------------------------------------
 	public static function patchable($method = FALSE)
 	{
-		if(isset($_REQUEST['_model']) &&$_REQUEST['_model'] === Self::getPostType()){
+		if(isset($_REQUEST['_model']) && $_REQUEST['_model'] === Self::getPostType()){
 
 			if(isset($_REQUEST['_id'])){
 				$model = Self::find($_REQUEST['_id']);

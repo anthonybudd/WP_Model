@@ -55,8 +55,6 @@ Download the WP_Model class and require it at the top of your functions.php file
 ### Setup
 You will then need to make a class that extends WP_Model. This class will need the public property $postType and $attributes, an array of strings.
 
-If you would like to have any taxonomies loaded into the model, add the optional parameter $taxonomies (array of taxonomy slugs) to the class.
-
 If you need to prefix the model's data in your post_meta table add a public property $prefix. This will be added to the post meta so the attribute 'color' will be saved in the database using the meta_key 'wp_model_color'
 ```php
 Class Product extends WP_Model
@@ -68,10 +66,6 @@ Class Product extends WP_Model
     public $attributes = [
         'color',
         'weight'
-    ];
-
-    public $taxonomies = [
-        'category',
     ];
 }
 ```
@@ -117,7 +111,7 @@ $product = Product::insert([
 
 ### Find()
 
-find() will return an instanciated model if a post exists in the database with the ID if a post cannot be found it will retur NULL.
+find() will return an instanciated model if a post exists in the database with the ID if a post cannot be found it will return NULL.
 
 ```php
 $product = Product::find(15);
@@ -152,7 +146,7 @@ $firstProducts = Product::in([1, 2, 3, 4]);
 
 ### Where()
 
-where() is a simple interface into WP_Query, the method can accept two string arguments (meta|_value and meta_key). For complex queries supply the method with a single array as the argument. The array will be automatically broken down into tax queries and meta queries, WP_Query will then be executed and will return an array of models.
+where() is a simple interface into WP_Query, the method can accept two string arguments (meta_value and meta_key). For complex queries supply the method with a single array as the argument. The array will be automatically broken down into tax queries and meta queries, WP_Query will then be executed and will return an array of models.
 
 ```php
 $greenProducts = Product::where('color', 'green');
@@ -209,6 +203,73 @@ Class Product extends WP_Model
 
 $heavyProducts = Product::finder('heavy');
 ```
+
+***
+
+### Taxonomies
+
+If you would like to have any taxonomies loaded into the model, add the optional public property $taxonomies (array of taxonomy slugs) to the class.
+```php
+Class Product extends WP_Model
+{
+    ...
+    public $taxonomies = [
+        'category',
+    ];
+}
+```
+
+You can set a models taxonomies by providing it in the array when instantiating the model, this array can be a combination of term slugs or term _ids.
+The model's terms can be accesed by getting the property named the taxonimy name. 
+```php
+$product = Product::insert([
+    'title' => 'product',
+    'color' => 'blue',
+    'weight' => '250',
+    'category' => ['home', 3]
+]);
+
+$product->category; // ['Home', 'Office'];
+```
+
+If you want direct access to the taxonomy objects you can do this by using the getTaxonomy() method. The first argument is the taxonomy name, the second argument is optional and it is the property to be extracted from the term object. Not providing the second argument will return WP_Term objects.
+
+```php
+$product->getTaxonomy('category'); // [WP_Term, WP_Term];
+$product->getTaxonomy('category', 'term_id'); // [2, 3];
+$product->getTaxonomy('category', 'name'); // ['Home', 'Office'];
+```
+
+You can add a taxonomy by using the addTaxonomy() method. The first argument is the taxonomy name, the second argument can either be the term_id (must be an integer) or the term slug (must be provided as a string). If the term could not be found the method will return FALSE.
+
+If you want to add multiple terms to a model you can use the addTaxonomies() method. The second argument must be an array of term slugs and/or term_ids.
+
+```php
+$product->addTaxonomy('category', 'home');
+$product->addTaxonomy('category', 3);
+
+$product->addTaxonomies('category', ['home', 'office']);
+$product->addTaxonomies('category', ['home', 3]);
+$product->addTaxonomies('category', [2, 3]);
+```
+
+To remove terms from the model you can use the removeTaxonomy() and removeTaxonomies() methods. These work in the same fashion as the addTaxonomy() and addTaxonomies() method as shown above.
+```php
+$product->removeTaxonomy('category', 'home');
+$product->removeTaxonomy('category', 3);
+
+$product->removeTaxonomies('category', ['home', 'office']);
+$product->removeTaxonomies('category', [2, 3]);
+```
+
+This will remove all terms associated to the model of the specified taxonomy.
+```php
+$product->clearTaxonomies('category');
+$product->getTaxonomy('category'); // [];
+```
+
+No chnage to the models taxonomies will be comited to the database untill you call the save() method.
+
 
 ***
 
