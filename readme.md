@@ -263,9 +263,9 @@ $product->removeTaxonomies('category', ['home', 'office']);
 $product->removeTaxonomies('category', [2, 3]);
 ```
 
-This will remove all terms associated to the model of the specified taxonomy.
+To remove all terms associated to the model of the specified taxonomy use clearTaxonomy().
 ```php
-$product->clearTaxonomies('category');
+$product->clearTaxonomy('category');
 $product->getTaxonomy('category'); // [];
 ```
 
