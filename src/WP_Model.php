@@ -79,7 +79,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 			foreach($this->attributes as $attribute){
 				$meta = $this->getMeta($attribute);
-				if($meta === '' && isset($this->default[$attribute])){
+				if(empty($meta) && isset($this->default[$attribute])){
 					$this->set($attribute, $this->default[$attribute]);
 				}else{
 					$this->set($attribute, $meta);
