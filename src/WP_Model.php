@@ -343,7 +343,7 @@ Abstract Class WP_Model implements JsonSerializable
 		}
 	}
 
-	public function clearTaxonomies($taxonomy){
+	public function clearTaxonomy($taxonomy){
 		$this->addTaxonomies($taxonomy, []);
 	}
 
