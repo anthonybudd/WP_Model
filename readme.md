@@ -1,5 +1,7 @@
 # WP_Model
 
+<p align="center"><img src="https://c1.staticflickr.com/1/415/31850480513_6cf2b5bdde_b.jpg"></p>
+
 ### A simple class for creating active record, eloquent-esque models of WordPress Posts.
 
 ```php
@@ -268,7 +270,7 @@ $product->clearTaxonomies('category');
 $product->getTaxonomy('category'); // [];
 ```
 
-No chnage to the models taxonomies will be comited to the database untill you call the save() method.
+No change to the models taxonomies will be committed to the database untill you call the save() method.
 
 
 ***
