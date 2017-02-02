@@ -487,7 +487,7 @@ $product->post() // Returns WP_Post object
 
 $product->permalink() // Returns post permalink
 
-$product->hasFeaturedImage($defaultURL) // Returns TRUE if a featured image has been set or FALSE if not
+$product->hasFeaturedImage() // Returns TRUE if a featured image has been set or FALSE if not
 
 $product->featuredImage($defaultURL) // Returns featured image URL
 
