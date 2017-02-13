@@ -322,7 +322,6 @@ Class Product extends WP_Model
 $product = Product::find(15);
 echo $product->humanWeight;
 ```
-***
 
 ### Default Properties
 To set default values for the attributes in your model use the $default property. The key of this array will be the attribute you wish to set a default value for and the value will be the default value.
