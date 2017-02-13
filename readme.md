@@ -25,6 +25,9 @@ $book->save();
 
 ```
 
+Introduction: [Medium Post](https://medium.com/@AnthonyBudd/wp-model-6887e1a24d3c)
+Advanced functionality: [Medium Post](https://medium.com/@AnthonyBudd/wp-model-advanced-b44f117617a7)
+
 ***
 
 ### Features

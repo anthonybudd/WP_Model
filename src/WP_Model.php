@@ -10,20 +10,24 @@
  */
 Abstract Class WP_Model implements JsonSerializable
 {
-	protected $attributes = [];
-	protected $taxonomies = [];
-	protected $default = [];
 	protected $tax_data = [];
-	protected $data = [];
-	protected $booted = FALSE;
-	public $new = TRUE;
-	public $dirty = FALSE;
-	public $ID;
-	public $prefix = '';
-	public $title;
-	public $content;
-	public $_post;
+	protected $data     = [];
 
+	public $attributes = [];
+	public $taxonomies = [];
+	public $default = [];
+	public $virtual = [];
+	public $filter = [];
+
+	public $new    = TRUE;
+	public $dirty  = FALSE;
+	public $booted = FALSE;
+	public $prefix = '';
+	public $ID;
+	public $title;
+	public $_post;
+	public $content;
+	
 
 	/**
 	 * Create a new instace with data
