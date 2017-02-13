@@ -112,6 +112,7 @@ $product = Product::insert([
 
 ***
 
+## Retrieving Posts
 ### Find()
 
 find() will return an instanciated model if a post exists in the database with the ID if a post cannot be found it will return NULL.
@@ -209,7 +210,7 @@ $heavyProducts = Product::finder('heavy');
 
 ***
 
-### Taxonomies
+## Taxonomies
 
 If you would like to have any taxonomies loaded into the model, add the optional public property $taxonomies (array of taxonomy slugs) to the class.
 ```php
@@ -339,6 +340,31 @@ Class Product extends WP_Model
 
 $product = new Product;
 echo $product->color; // black
+```
+
+### Filter Properties
+If you need a property to be parsed before the are returned you can use a filter method. You must add the attribute name to a array named $filter and create a method prefixed with ‘_filter’, this method must take one argument, this will be the property value.
+
+```php
+
+Class Product extends WP_Model
+{
+    ...
+
+    publid $filter = [
+        'weight'
+    ];
+
+    public function _filterWeight($value){
+        return intVal($value);
+    }
+}
+
+$product = Product::insert([
+    'weight' => '250'
+]);
+
+echo $product->weight; // (int) 250
 ```
 
 ***
