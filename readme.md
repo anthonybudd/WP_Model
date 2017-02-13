@@ -179,7 +179,7 @@ Class Product extends WP_Model
 {
     ...
 
-    public function heavyFinder()
+    public function _finderHeavy()
     {  
         return [
             'meta_query' => [
@@ -194,7 +194,7 @@ Class Product extends WP_Model
     }
 
     // Optional
-    public function heavyPostFinder($results)
+    public function _postFinderHeavy($results)
     {  
         return array_map(function($model){
             if($model->color == 'green'){
@@ -285,7 +285,7 @@ $product->delete();
 ```
 
 ### hardDelete()
-hardDelete() will delete the post's r the post and set all of it's meta (in the database and in the object) to NULL.
+    hardDelete() will delete the post and set all of it's meta (in the database and in the object) to NULL.
 
 ```php
 $product->hardDelete();

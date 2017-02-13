@@ -349,12 +349,26 @@ Abstract Class WP_Model implements JsonSerializable
 
 	public function isVirtualProperty($attribute)
 	{
-		return method_exists($this, ('_get'. ucfirst($attribute)));
+		return (isset($this->virtual) &&
+			in_array($attribute, $this->virtual) && 
+			method_exists($this, ('_get'. ucfirst($attribute))));
 	}
 
 	public function getVirtualProperty($attribute)
 	{
 		return call_user_func([$this, ('_get'. ucfirst($attribute))]);  
+	}
+
+	public function isFilterProperty($attribute)
+	{
+		return (isset($this->filter) &&
+			in_array($attribute, $this->filter) &&
+			method_exists($this, ('_filter'. ucfirst($attribute))));
+	}
+
+	public function getFilterProperty($attribute)
+	{
+		return call_user_func([$this, ('_filter'. ucfirst($attribute))]);  
 	}
 
 	// -----------------------------------------------------
@@ -472,11 +486,14 @@ Abstract Class WP_Model implements JsonSerializable
 	public function __get($attribute)
 	{
 		if(in_array($attribute, $this->attributes)){
+			if($this->isFilterProperty($attribute)){
+				return $this->getFilterProperty($attribute);
+			}
 			return $this->get($attribute);
+		}else if($this->isVirtualProperty($attribute)){
+			return $this->getVirtualProperty($attribute);
 		}else if(isset($this->taxonomies) && in_array($attribute, $this->taxonomies)){
 			return $this->getTaxonomy($attribute, 'name');
-		}else if(isset($this->virtual) && in_array($attribute, $this->virtual) && $this->isVirtualProperty($attribute)){
-			return $this->getVirtualProperty($attribute);
 		}else if($attribute === 'post_title'){
 			return $this->title;
 		}else if($attribute === 'post_content'){
@@ -587,18 +604,16 @@ Abstract Class WP_Model implements JsonSerializable
 	 * @param  [type] $finder [description]
 	 * @return [type]         [description]
 	 */
-	public static function finder($finder)
+	public static function finder($finder, Array $arguments = [])
 	{
 		$return = [];
-		$finderMethod = $finder.'Finder';
+		$finderMethod = '_finder'.ucfirst($finder);
 		$self = get_called_class();
-
 		if(!in_array($finderMethod, array_column(( new ReflectionClass(get_called_class()) )->getMethods(), 'name'))){
 			throw new Exception("Finder method {$finderMethod} not found in {$self}");
 		}
 
-		
-		$args = $self::$finderMethod();
+		$args = $self::$finderMethod($arguments);
 		if(!is_array($args)){
 			throw new Exception("Finder method must return an array");
 		}
@@ -608,9 +623,9 @@ Abstract Class WP_Model implements JsonSerializable
 			$return[] = Self::find($post->ID);
 		}
 
-		$postFinderMethod = $finder.'PostFinder';
+		$postFinderMethod = '_postFinder'.ucfirst($finder);
 		if(in_array($postFinderMethod, array_column(( new ReflectionClass(get_called_class()) )->getMethods(), 'name'))){
-			return $self::$postFinderMethod($return);
+			return $self::$postFinderMethod($return, $arguments);
 		}
 
 		return $return;
@@ -620,18 +635,22 @@ Abstract Class WP_Model implements JsonSerializable
 	{
 		if(is_array($key)){
 			$params = [
-				'post_type' => Self::getPostType(),
+				'post_type'  => Self::getPostType(),
 				'meta_query' => [],
-				'tax_query' => [],
+				'tax_query'  => [],
 			];
 
-			foreach($key as $meta){
-				if(!empty($meta['taxonomy'])){
+			foreach($key as $key_ => $meta){
+				if($key_ === 'meta_relation'){
+					$params['meta_query']['relation'] = $meta;
+				}else if($key_ === 'tax_relation'){
+					$params['tax_query']['relation'] = $meta;
+				}else if(!empty($meta['taxonomy'])){
 					$params['tax_query'][] = [
 						'taxonomy' => $meta['taxonomy'],
                 		'field'    => isset($meta['field'])? $meta['field'] : 'slug',
                 		'terms'    => $meta['terms'],
-                		'operator'    => isset($meta['operator'])? $meta['operator'] : 'IN',
+                		'operator' => isset($meta['operator'])? $meta['operator'] : 'IN',
 					];
 				}else{
 					$params['meta_query'][] = [
@@ -646,7 +665,7 @@ Abstract Class WP_Model implements JsonSerializable
 			$query = new WP_Query($params);
 		}else{
 			$query = new WP_Query([
-				'post_type' => Self::getPostType(),
+				'post_type' 		=> Self::getPostType(),
 				'meta_query'        => [
 					[
 						'key'       => $key,
