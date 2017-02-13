@@ -368,7 +368,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 	public function getFilterProperty($attribute)
 	{
-		return call_user_func([$this, ('_filter'. ucfirst($attribute))]);  
+		return call_user_func_array([$this, ('_filter'. ucfirst($attribute))], [$this->get($attribute)]);  
 	}
 
 	// -----------------------------------------------------
