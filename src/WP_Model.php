@@ -68,6 +68,7 @@ Abstract Class WP_Model implements JsonSerializable
 		$this->boot();
 	}
 
+
 	/**
 	 * Load data into the model
 	 */
@@ -230,12 +231,54 @@ Abstract Class WP_Model implements JsonSerializable
 		return get_post_meta($this->ID, ($this->prefix.$key), TRUE);
 	}
 
+	/**
+	 * @return void
+	 */
 	public function setMeta($key, $value){
 		update_post_meta($this->ID, ($this->prefix.$key), $value);
 	}
 
+	/**
+	 * @return void
+	 */
 	public function deleteMeta($key){
 		delete_post_meta($this->ID, ($this->prefix.$key));
+	}
+
+	/**
+	 * @return void
+	 */
+	public function isVirtualProperty($attribute)
+	{
+		return (isset($this->virtual) &&
+			in_array($attribute, $this->virtual) && 
+			method_exists($this, ('_get'. ucfirst($attribute))));
+	}
+
+	/**
+	 * @return void
+	 */
+	public function getVirtualProperty($attribute)
+	{
+		return call_user_func([$this, ('_get'. ucfirst($attribute))]);  
+	}
+
+	/**
+	 * @return void
+	 */
+	public function isFilterProperty($attribute)
+	{
+		return (isset($this->filter) &&
+			in_array($attribute, $this->filter) &&
+			method_exists($this, ('_filter'. ucfirst($attribute))));
+	}
+
+	/**
+	 * @return void
+	 */
+	public function getFilterProperty($attribute)
+	{
+		return call_user_func_array([$this, ('_filter'. ucfirst($attribute))], [$this->get($attribute)]);  
 	}
 
 
@@ -266,6 +309,9 @@ Abstract Class WP_Model implements JsonSerializable
 		$this->data[$attribute] = $value;
 	}
 
+	/**
+	 * @return void
+	 */
 	public function getTaxonomy($attribute, $param = NULL)
 	{
 		if(isset($this->taxonomies) && isset($this->tax_data[$attribute])){
@@ -282,8 +328,7 @@ Abstract Class WP_Model implements JsonSerializable
 	}
 
 	/**
-	 * NOT DONE
-	 * $value can be array of id's (ints) or array of slugs
+	 * @return void
 	 */
 	public function addTaxonomy($taxonomy, $value)
 	{
@@ -306,8 +351,7 @@ Abstract Class WP_Model implements JsonSerializable
 	}
 
 	/**
-	 * NOT DONE
-	 * $value can be array of id's (ints) or array of slugs
+	 * @return void
 	 */
 	public function addTaxonomies($attribute, Array $taxonomies)
 	{
@@ -318,7 +362,7 @@ Abstract Class WP_Model implements JsonSerializable
 	}
 
 	/**
-	 * NOT DONE
+	 * @return void
 	 */
 	public function removeTaxonomy($attribute, $value)
 	{
@@ -340,6 +384,9 @@ Abstract Class WP_Model implements JsonSerializable
 		}
 	}
 
+	/**
+	 * @return void
+	 */
 	public function removeTaxonomies($attribute, Array $taxonomies)
 	{
 		foreach($taxonomies as $taxonomy){
@@ -347,32 +394,11 @@ Abstract Class WP_Model implements JsonSerializable
 		}
 	}
 
+	/**
+	 * @return void
+	 */
 	public function clearTaxonomy($taxonomy){
 		$this->addTaxonomies($taxonomy, []);
-	}
-
-	public function isVirtualProperty($attribute)
-	{
-		return (isset($this->virtual) &&
-			in_array($attribute, $this->virtual) && 
-			method_exists($this, ('_get'. ucfirst($attribute))));
-	}
-
-	public function getVirtualProperty($attribute)
-	{
-		return call_user_func([$this, ('_get'. ucfirst($attribute))]);  
-	}
-
-	public function isFilterProperty($attribute)
-	{
-		return (isset($this->filter) &&
-			in_array($attribute, $this->filter) &&
-			method_exists($this, ('_filter'. ucfirst($attribute))));
-	}
-
-	public function getFilterProperty($attribute)
-	{
-		return call_user_func_array([$this, ('_filter'. ucfirst($attribute))], [$this->get($attribute)]);  
 	}
 
 	// -----------------------------------------------------
@@ -408,6 +434,9 @@ Abstract Class WP_Model implements JsonSerializable
 		return $this->_post;
 	}
 
+	/**
+	 * @return void
+	 */
 	public function hasFeaturedImage()
 	{
 		return (get_the_post_thumbnail_url($this->ID) !== FALSE)? TRUE : FALSE;
@@ -466,6 +495,9 @@ Abstract Class WP_Model implements JsonSerializable
 		return Self::find(get_the_ID());
 	}
 
+	/**
+	 * @return void
+	 */
 	public function permalink()
 	{
 		return get_permalink($this->ID);
@@ -474,6 +506,9 @@ Abstract Class WP_Model implements JsonSerializable
 	// -----------------------------------------------------
 	// MAGIC METHODS
 	// -----------------------------------------------------
+	/**
+	 * @return void
+	 */
 	public function __set($attribute, $value)
 	{
 		if($this->booted){
@@ -487,6 +522,9 @@ Abstract Class WP_Model implements JsonSerializable
 		}
 	}
 
+	/**
+	 * @return void
+	 */
 	public function __get($attribute)
 	{
 		if(in_array($attribute, $this->attributes)){
@@ -604,9 +642,7 @@ Abstract Class WP_Model implements JsonSerializable
 	}
 
 	/**
-	 * [finder description]
-	 * @param  [type] $finder [description]
-	 * @return [type]         [description]
+	 * @return void
 	 */
 	public static function finder($finder, Array $arguments = [])
 	{
@@ -635,6 +671,9 @@ Abstract Class WP_Model implements JsonSerializable
 		return $return;
 	}
 
+	/**
+	 * @return void
+	 */
 	public static function where($key, $value = FALSE)
 	{
 		if(is_array($key)){
@@ -688,6 +727,9 @@ Abstract Class WP_Model implements JsonSerializable
 		return $arr;
 	}
 
+	/**
+	 * @return void
+	 */
 	public static function in($ids = [])
 	{
 		$results = [];
@@ -764,6 +806,9 @@ Abstract Class WP_Model implements JsonSerializable
 	// -----------------------------------------------------
 	// DELETE
 	// -----------------------------------------------------
+	/**
+	 * @return void
+	 */
 	public function delete()
 	{
 		$this->triggerEvent('deleting');
@@ -771,6 +816,9 @@ Abstract Class WP_Model implements JsonSerializable
 		$this->triggerEvent('deleted');
 	}
 
+	/**
+	 * @return void
+	 */
 	public function hardDelete()
 	{
 		$this->triggerEvent('hardDeleting');
@@ -794,6 +842,9 @@ Abstract Class WP_Model implements JsonSerializable
 		$this->triggerEvent('hardDeleted');
 	}
 
+	/**
+	 * @return void
+	 */
 	public static function restore($ID){
 		wp_untrash_post($ID);
 		return Self::find($ID);
@@ -802,6 +853,9 @@ Abstract Class WP_Model implements JsonSerializable
 	// -----------------------------------------------------
 	// PATCHING 
 	// -----------------------------------------------------
+	/**
+	 * @return void
+	 */
 	public static function patchable($method = FALSE)
 	{
 		if(isset($_REQUEST['_model']) && $_REQUEST['_model'] === Self::getPostType()){
@@ -817,6 +871,9 @@ Abstract Class WP_Model implements JsonSerializable
 		}
 	}
 
+	/**
+	 * @return void
+	 */
 	public function patch($method = FALSE)
 	{
 		$this->triggerEvent('patching');
