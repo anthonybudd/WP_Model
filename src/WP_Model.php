@@ -24,8 +24,9 @@ Abstract Class WP_Model implements JsonSerializable
 	public $booted = FALSE;
 	public $prefix = '';
 	public $ID;
-	public $title;
 	public $_post;
+	public $_where;
+	public $title;
 	public $content;
 	
 
@@ -193,11 +194,15 @@ Abstract Class WP_Model implements JsonSerializable
 	 * Get the name propery of the inherited class.
 	 * @return String
 	 */
-	public static function getPostType()
-	{
+	protected static function newWithoutConstructor(){
 		$class = get_called_class();
 		$reflection = new ReflectionClass($class);
-		$model = $reflection->newInstanceWithoutConstructor();
+		return $reflection->newInstanceWithoutConstructor();
+	}
+
+	public static function getPostType()
+	{
+		$model = Self::newWithoutConstructor();
 
 		if(isset($model->postType)){
 			return $model->postType;
@@ -744,6 +749,70 @@ Abstract Class WP_Model implements JsonSerializable
 		}
 
 		return $results;
+	}
+
+	// -----------------------------------------------------
+	// Query
+	// -----------------------------------------------------
+	public static function query(){
+		$model = Self::newWithoutConstructor();
+		$model->_where = [];
+		return $model;
+	}
+
+	public function meta($key, $x, $y = NULL, $z = NULL){
+		if(!is_null($z)){
+			$this->_where[] = [
+				'key'     => $key,
+				'compare' => $x,
+				'value'   => $y,
+				'type'    => $z
+			];
+		}elseif(!is_null($y)){
+			$this->_where[] = [
+				'key'     => $key,
+				'compare' => $x,
+				'value'   => $y,
+			];
+		}else{
+			$this->_where[] = [
+				'key'     => $key,
+				'value'   => $x,
+			];
+		}
+
+		return $this;
+	}
+
+	public function tax($taxonomy, $x, $y = NULL, $z = NULL){
+		if(!is_null($z)){
+			$this->_where[] = [
+				'taxonomy'  => $taxonomy,
+				'field'     => $x,
+				'operator'  => $y,
+				'terms'     => $z,
+			];
+		}elseif(!is_null($y)){
+			$this->_where[] = [
+				'taxonomy'  => $taxonomy,
+				'field'     => $x,
+				'operator'  => 'IN',
+				'terms'     => $y,
+			];
+		}else{
+			$this->_where[] = [
+				'taxonomy'  => $taxonomy,
+				'field'     => 'slug',
+				'operator'  => 'IN',
+				'terms'     => $x,
+			];
+		}
+
+		return $this;
+	}
+
+	public function execute(){
+		return Self::where($this->_where);
 	}
 
 	// -----------------------------------------------------

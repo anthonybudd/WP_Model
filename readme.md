@@ -152,6 +152,39 @@ $firstProducts = Product::in(1, 2, 3, 4);
 $firstProducts = Product::in([1, 2, 3, 4]);
 ```
 
+### Chainable Finders
+
+If you prefur to find your models using a chainable OOP style syntax the query() method is a chainable wrpper for the where() method. Each of the finder chainable finder methods meta() and tax can accept a variging amout of argumnts
+
+#### meta()
+```php
+Product::query()
+    ->meta('meta_key', 'meta_value')
+    ->meta('meta_key', 'compare', meta_value')
+    ->meta('meta_key', 'compare', meta_value', 'type')
+```
+
+#### meta()
+```php
+Product::query()
+    ->meta('meta_key', 'meta_value')
+    ->meta('meta_key', 'compare', meta_value')
+    ->meta('meta_key', 'compare', meta_value', 'type')
+```
+
+#### example()
+```php
+$products = Product::query()
+    ->meta('color', 'red')
+    ->meta('weight', '>', 2000, 'NUMERIC')
+    ->tax('type', 'small')
+    ->tax('category', ['office', 'home'])
+    ->tax('quality', 'slug', 'high')
+    ->tax('county', 'term_id', 'NOT IN', [1, 5])
+    ->execute();
+```
+
+
 ### Where()
 
 where() is a simple interface into WP_Query, the method can accept two string arguments (meta_value and meta_key). For complex queries supply the method with a single array as the argument. The array will be automatically broken down into tax queries and meta queries, WP_Query will then be executed and will return an array of models.
@@ -211,6 +244,7 @@ Class Product extends WP_Model
 
 $heavyProducts = Product::finder('heavy');
 ```
+
 
 ***
 
