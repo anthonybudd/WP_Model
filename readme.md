@@ -68,7 +68,7 @@ If you need to prefix the model's data in your post_meta table add a public prop
 Class Product extends WP_Model
 {
     public $postType = 'product';
-
+    
     public $prefix = 'wp_model_';
 
     public $attributes = [
@@ -174,6 +174,12 @@ Product::query()
 ```
 
 #### Example
+
+```php
+$products = Product::query()
+    ->meta('color', 'blue')
+    ->execute();
+```
 ```php
 $products = Product::query()
     ->meta('color', 'red')
@@ -400,8 +406,6 @@ You can also trigger the save, insert and delete events from the admin section o
 - deleted
 - hardDeleting
 - hardDeleted
-- patching
-- patched
 
 When saving a new model the saving, inserting, inserted and saved events are all fired (in that order).
 

@@ -2,7 +2,7 @@
 // Dear Reader,
 // 
 // I am acutely aware how bad this code is for testing
-// but, it did the job when I coul set-up wp unit testing.
+// but, it did the job when I couldn't set-up WP unit testing.
 // 
 // 
 // P.S Star the rep
@@ -25,8 +25,6 @@ $events = [
 	'deleted' 		=> FALSE,
 	'hardDeleting' 	=> FALSE,
 	'hardDeleted' 	=> FALSE,
-	'patching' 		=> FALSE,
-	'patched' 		=> FALSE,
 ];
 
 function setup(){
@@ -62,6 +60,8 @@ function error($debug, $info = '!!!'){
 
 
 function test(){
+
+
 	// -----------------------------------------------------
 	// PROPERTIES
 	// -----------------------------------------------------
@@ -87,8 +87,6 @@ function test(){
 		if(! ($product->weight === 250) ){
 			error(__LINE__ .' $default');
 		}
-
-
 
 
 
@@ -334,7 +332,7 @@ function test(){
 			]);
 
 			$product->removeTaxonomy('category', 'home');
-			$product->removeTaxonomy('category', 3);
+			$product->removeTaxonomy('category', 7);
 
 			if(! (count($product->category) === 0) ){
 				error(__LINE__ .' removeTaxonomy()');
@@ -348,7 +346,7 @@ function test(){
 			    'category' => ['home', 'office']
 			]);
 
-			$product->removeTaxonomies('category', ['home', 3]);
+			$product->removeTaxonomies('category', ['home', 7]);
 
 			if(! (count($product->category) === 0) ){
 				error(__LINE__ .' removeTaxonomies()');
@@ -633,11 +631,11 @@ function test(){
 				'tax_relation' => 'OR',
 				[
 					'meta_key' => 'color',
-					'meta_vale' => 'blue'
+					'meta_value' => 'blue'
 				],
 				[
 					'meta_key' => 'weight',
-					'meta_vale' => '250'
+					'meta_value' => '250'
 				],
 				[
 					'taxonomy' => 'category',
@@ -771,10 +769,6 @@ function test(){
 				error(__LINE__ .' restore()');
 			}
 			
-
-	// -----------------------------------------------------
-	// PATCHING
-	// -----------------------------------------------------
 	
 }
 
