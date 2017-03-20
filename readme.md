@@ -4,9 +4,9 @@
 
 ### A simple class for creating active record, eloquent-esque models of WordPress Posts.
 
-####Introduction: [Medium Post](https://medium.com/@AnthonyBudd/wp-model-6887e1a24d3c)
+###Introduction: [Medium Post](https://medium.com/@AnthonyBudd/wp-model-6887e1a24d3c)
 
-####Advanced Functionality: [Medium Post](https://medium.com/@AnthonyBudd/wp-model-advanced-b44f117617a7)
+###Advanced Functionality: [Medium Post](https://medium.com/@AnthonyBudd/wp-model-advanced-b44f117617a7)
 
 
 ```php
@@ -32,12 +32,9 @@ $book->save();
 
 ***
 
-### Features
+### In A Nutshell
 
-* Intuitive Active Record ORM
-* Event System
-* Custom Finders
-* Useful Helpers
+WP_Model provides a much needed update to the WordPress ORM. It's perfect if you need advanced data abstraction using a clean OOP style syntax. It has been specifically written so front-end developers could easily use it but powerful enough (virtual properties, events, etc) that it could be genuinely useful to back-end devs who want to make complex WP based projects.
 
 
 ***
@@ -157,7 +154,7 @@ $firstProducts = Product::in([1, 2, 3, 4]);
 
 If you prefer to find your models using a chainable OOP style syntax the query() method is a  wrapper for the where() method. Each of the finder chainable finder methods meta() and tax can accept a varying amount of arguments. You must call the execute() method to run the query.
 
-#### meta()
+#### Meta()
 ```php
 Product::query()
     ->meta('meta_key', 'meta_value')
@@ -165,7 +162,7 @@ Product::query()
     ->meta('meta_key', 'compare', meta_value', 'type')
 ```
 
-#### tax()
+#### Tax()
 ```php
 Product::query()
     ->tax('taxonomy', 'terms')

@@ -118,9 +118,7 @@ function test(){
 			if(!($events['deleted'])){      error(__LINE__ .' deleted Event');}
 			if(!($events['hardDeleting'])){ error(__LINE__ .' hardDeleting Event');}
 			if(!($events['hardDeleted'])){  error(__LINE__ .' hardDeleted Event');}
-			// if(!($events['patching'])){ error(__LINE__ .' patching Event');}
-			// if(!($events['patched'])){ error(__LINE__ .' patched Event');}
-			
+
 
 	// -----------------------------------------------------
 	// HOOKS
