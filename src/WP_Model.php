@@ -122,12 +122,12 @@ Abstract Class WP_Model implements JsonSerializable
 	{
 		$postType = Self::getPostType();
 
-		$defualts = [
+		$defaults = [
 			'public' => TRUE,
 			'label' => ucfirst($postType)
 		];
 
-		register_post_type($postType, array_merge($defualts, $args));
+		register_post_type($postType, array_merge($defaults, $args));
 
 		Self::addHooks();
 	}
@@ -912,7 +912,7 @@ Abstract Class WP_Model implements JsonSerializable
 	// SAVE
 	// -----------------------------------------------------
 	/**
-	 * Save the model and all of it's asociated data
+	 * Save the model and all of it's associated data
 	 * @return Object $this
 	 */
 	public function save()
@@ -926,22 +926,22 @@ Abstract Class WP_Model implements JsonSerializable
 		Self::removeHooks();
 
 		if(is_integer($this->ID)){
-			$defualts = [
+			$defaults = [
 				'ID'           => $this->ID,
 				'post_title'   => $this->title,
 				'post_content' => ($this->content !== NULL)? $this->content :  ' ',
 			];
 
-			wp_update_post(array_merge($defualts, $overwrite));
+			wp_update_post(array_merge($defaults, $overwrite));
 		}else{
 			$this->triggerEvent('inserting');
-			$defualts = [
+			$defaults = [
 				'post_status'  => 'publish',
 				'post_title'   => $this->title,
 				'post_content' => ($this->content !== NULL)? $this->content :  ' ',
 			];
 
-			$this->ID = wp_insert_post(array_merge($defualts, $overwrite));
+			$this->ID = wp_insert_post(array_merge($defaults, $overwrite));
 			$this->_post = get_post($this->ID);
 			$this->triggerEvent('inserted');
 		}
@@ -985,13 +985,13 @@ Abstract Class WP_Model implements JsonSerializable
 	{
 		$this->triggerEvent('hardDeleting');
 
-		$defualts = [
+		$defaults = [
 			'ID'           => $this->ID,
 			'post_title'   => '',
 			'post_content' => '',
 		];
 
-		wp_update_post($defualts);
+		wp_update_post($defaults);
 
 		foreach($this->attributes as $attribute){
 			$this->deleteMeta($attribute);
