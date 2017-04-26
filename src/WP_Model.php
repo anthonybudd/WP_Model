@@ -913,6 +913,9 @@ Abstract Class WP_Model implements JsonSerializable
 	// -----------------------------------------------------
 	/**
 	 * Save the model and all of it's associated data
+	 *
+	 * @param Array $overrides  List of parameters to override for wp_insert_post(), such as post_status
+	 *
 	 * @return Object $this
 	 */
 	public function save($overrides = [])
