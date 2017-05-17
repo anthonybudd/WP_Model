@@ -30,16 +30,16 @@ Abstract Class WP_Model implements JsonSerializable
 	public $dirty  = FALSE;
 	public $booted = FALSE;
 
-	
+
 
 	/**
 	 * Create a new instace with data
-	 * 
+	 *
 	 * @param array $insert
 	 * @return void
 	 */
 	public function __construct(Array $insert = [])
-	{ 	
+	{
 		if(!empty($this->default)){
 			foreach($this->default as $attribute => $value){
 				$this->data[$attribute] = $value;
@@ -50,7 +50,7 @@ Abstract Class WP_Model implements JsonSerializable
 			if(in_array($attribute, $this->attributes)){
 				$this->set($attribute, $value);
 			}
-			
+
 			if(!empty($this->taxonomies)){
 				if(in_array($attribute, $this->taxonomies)){
 					if(is_array($value)){
@@ -114,7 +114,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 	/**
 	 * Register the post type using the propery $postType as the post type
-	 * 
+	 *
 	 * @param  array  $args  see: register_post_type()
 	 * @return void
 	 */
@@ -122,19 +122,19 @@ Abstract Class WP_Model implements JsonSerializable
 	{
 		$postType = Self::getPostType();
 
-		$defualts = [
+		$defaults = [
 			'public' => TRUE,
 			'label' => ucfirst($postType)
 		];
 
-		register_post_type($postType, array_merge($defualts, $args));
+		register_post_type($postType, array_merge($defaults, $args));
 
 		Self::addHooks();
 	}
 
 	/**
 	 * Create a new model with data, save and return the model
-	 * 
+	 *
 	 * @param array $insert
 	 */
 	public static function insert(Array $insert = []){
@@ -147,7 +147,7 @@ Abstract Class WP_Model implements JsonSerializable
 	// -----------------------------------------------------
 	/**
 	 * Fire event if the event method exists
-	 * 
+	 *
 	 * @param  string $event event name
 	 * @return bool
 	 */
@@ -160,7 +160,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 		return FALSE;
 	}
-	
+
 
 	// -----------------------------------------------------
 	// HOOKS
@@ -174,7 +174,7 @@ Abstract Class WP_Model implements JsonSerializable
 	{
 		add_action(('save_post'), [get_called_class(), 'onSave'], 9999999999);
 	}
- 
+
  	/**
 	 * Remove hooks
 	 *
@@ -187,7 +187,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 	/**
 	 * save_post hook: Triggers save method for a given post
-	 * 
+	 *
 	 * @param int $ID
 	 * @return void
 	 */
@@ -206,7 +206,7 @@ Abstract Class WP_Model implements JsonSerializable
 	// -----------------------------------------------------
 	/**
 	 * Create a new model without calling the constructor.
-	 * 
+	 *
 	 * @return object
 	 */
 	protected static function newWithoutConstructor(){
@@ -233,7 +233,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 	/**
 	 * Returns the post type
-	 * 
+	 *
 	 * @return string
 	 *
 	 * @throws \Exception
@@ -253,7 +253,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 	/**
 	 * Returns a new model
-	 * 
+	 *
 	 * @return object
 	 */
 	public static function newInstance($insert = [])
@@ -263,8 +263,8 @@ Abstract Class WP_Model implements JsonSerializable
 	}
 
 	/**
-	 * Returns an array representaion of the model for serialization 
-	 * 
+	 * Returns an array representaion of the model for serialization
+	 *
 	 * @return array
 	 */
 	public function jsonSerialize()
@@ -273,7 +273,7 @@ Abstract Class WP_Model implements JsonSerializable
     }
 
     /**
-     * Returns TRUE if $attribute is in the $virtual array 
+     * Returns TRUE if $attribute is in the $virtual array
      * and has a corresponding vitaul property method
      *
      * @param  string $attribute
@@ -282,7 +282,7 @@ Abstract Class WP_Model implements JsonSerializable
 	public function isVirtualProperty($attribute)
 	{
 		return (isset($this->virtual) &&
-			in_array($attribute, $this->virtual) && 
+			in_array($attribute, $this->virtual) &&
 			method_exists($this, ('_get'. ucfirst($attribute))));
 	}
 
@@ -294,11 +294,11 @@ Abstract Class WP_Model implements JsonSerializable
 	 */
 	public function getVirtualProperty($attribute)
 	{
-		return call_user_func([$this, ('_get'. ucfirst($attribute))]);  
+		return call_user_func([$this, ('_get'. ucfirst($attribute))]);
 	}
 
 	/**
-     * Returns TRUE if $attribute is in the $filter array 
+     * Returns TRUE if $attribute is in the $filter array
      * and has a corresponding filter property method
      *
      * @param  string $attribute
@@ -319,7 +319,7 @@ Abstract Class WP_Model implements JsonSerializable
 	 */
 	public function getFilterProperty($attribute)
 	{
-		return call_user_func_array([$this, ('_filter'. ucfirst($attribute))], [$this->get($attribute)]);  
+		return call_user_func_array([$this, ('_filter'. ucfirst($attribute))], [$this->get($attribute)]);
 	}
 
 
@@ -328,7 +328,7 @@ Abstract Class WP_Model implements JsonSerializable
 	// -----------------------------------------------------
 	/**
 	 * Returns meta value for a meta key
-	 * 
+	 *
 	 * @param  string meta_key
 	 * @return string
 	 */
@@ -338,7 +338,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 	/**
 	 * Set meta value for a meta key
-	 * 
+	 *
 	 * @param  string meta_key
 	 * @param  string meta_value
 	 * @return void
@@ -348,8 +348,8 @@ Abstract Class WP_Model implements JsonSerializable
 	}
 
 	/**
-	 * Delete meta's meta 
-	 * 
+	 * Delete meta's meta
+	 *
 	 * @param  string meta_key
 	 * @return void
 	 */
@@ -363,7 +363,7 @@ Abstract Class WP_Model implements JsonSerializable
 	// -----------------------------------------------------
 	/**
 	 * Get property of model or $default
-	 * 
+	 *
 	 * @param  property $attribute [description]
 	 * @param  property $default
 	 * @return mixed
@@ -381,7 +381,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 	/**
 	 * Set propert of the model
-	 * 
+	 *
 	 * @param string $attribute
 	 * @param string $value
 	 * @return void
@@ -437,7 +437,7 @@ Abstract Class WP_Model implements JsonSerializable
 	// Taxonomies
 	// -----------------------------------------------------
 	/**
-	 * 
+	 *
 	 * @return void
 	 */
 	public function getTaxonomy($attribute, $param = NULL)
@@ -534,13 +534,13 @@ Abstract Class WP_Model implements JsonSerializable
 	// -----------------------------------------------------
 	/**
 	 * Check if the post exists by Post ID
-	 * 
+	 *
 	 * @param  string|inte  $ID   Post ID
 	 * @param  bool 		$postTypeSafe Require post to be the same post type as the model
 	 * @return bool
 	 */
 	public static function exists($ID, $postTypeSafe = TRUE)
-	{	
+	{
 		if($postTypeSafe){
 			if(
 				(get_post_status($ID) !== FALSE) &&
@@ -556,7 +556,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 	/**
 	 * Returns the original post object
-	 * 
+	 *
 	 * @return WP_Post
 	 */
 	public function post()
@@ -566,7 +566,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 	/**
 	 * Returns TRUE if the model's post has an associated featured image
-	 * 
+	 *
 	 * @return bool
 	 */
 	public function hasFeaturedImage()
@@ -576,7 +576,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 	/**
 	 * Get model's featured image or return $default if it does not exist
-	 * 
+	 *
 	 * @param  string $default
 	 * @return string
 	 */
@@ -588,7 +588,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 	/**
 	 * Returns an asoc array representaion of the model
-	 * 
+	 *
 	 * @return array
 	 */
 	public function toArray()
@@ -622,7 +622,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 	/**
 	 * Get the model for a single page or in the loop
-	 * 
+	 *
 	 * @return object|NULL
 	 */
 	public static function single()
@@ -632,7 +632,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 	/**
 	 * returns the post's permalink
-	 * 
+	 *
 	 * @return string
 	 */
 	public function permalink()
@@ -646,7 +646,7 @@ Abstract Class WP_Model implements JsonSerializable
 	// ----------------------------------------------------
 	/**
 	 * Find model by it's post ID
-	 * 
+	 *
 	 * @param  int $ID
 	 * @return Object|NULL
 	 */
@@ -664,7 +664,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 	/**
 	 * Get model by ID without booting the model
-	 * 
+	 *
 	 * @param  int $ID
 	 * @return Object|NULL
 	 */
@@ -698,7 +698,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 	/**
 	 * Find the model by ID. If the post does not exist throw.
-	 * 
+	 *
 	 * @param  int $id
 	 * @return object
 	 *
@@ -715,7 +715,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 	/**
 	 * Returns all models
-	 * 
+	 *
 	 * @param  string $limit
 	 * @return array
 	 */
@@ -738,7 +738,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 	/**
 	 * Retun an array of models as asoc array. Key by $value
-	 * 
+	 *
 	 * @param  string  $value
 	 * @param  array   $models
 	 * @return array
@@ -755,7 +755,7 @@ Abstract Class WP_Model implements JsonSerializable
 			if(is_int($model) || $model instanceof WP_Post){
 				$model = Self::find($model->ID);
 			}
-			
+
 			$return[$model->ID] = $model->$value;
 		}
 
@@ -847,7 +847,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 		$arr = [];
 		foreach($query->get_posts() as $key => $post){
-			$arr[] = Self::find($post->ID); 
+			$arr[] = Self::find($post->ID);
 		}
 
 		return $arr;
@@ -865,7 +865,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 		foreach($ids as $key => $id){
 			if(Self::exists($id)){
-				$results[] = Self::find($id); 
+				$results[] = Self::find($id);
 			}
 		}
 
@@ -945,36 +945,39 @@ Abstract Class WP_Model implements JsonSerializable
 	// SAVE
 	// -----------------------------------------------------
 	/**
-	 * Save the model and all of it's asociated data
+	 * Save the model and all of it's associated data
+	 *
+	 * @param Array $overrides  List of parameters to override for wp_insert_post(), such as post_status
+	 *
 	 * @return Object $this
 	 */
-	public function save()
+	public function save($overrides = [])
 	{
 		$this->triggerEvent('saving');
 
-		$overwrite = [
+		$overwrite = array_merge($overrides, [
 			'post_type' => Self::getPostType()
-		];
+		]);
 
 		Self::removeHooks();
 
 		if(is_integer($this->ID)){
-			$defualts = [
+			$defaults = [
 				'ID'           => $this->ID,
 				'post_title'   => $this->title,
 				'post_content' => ($this->content !== NULL)? $this->content :  ' ',
 			];
 
-			wp_update_post(array_merge($defualts, $overwrite));
+			wp_update_post(array_merge($defaults, $overwrite));
 		}else{
 			$this->triggerEvent('inserting');
-			$defualts = [
+			$defaults = [
 				'post_status'  => 'publish',
 				'post_title'   => $this->title,
 				'post_content' => ($this->content !== NULL)? $this->content :  ' ',
 			];
 
-			$this->ID = wp_insert_post(array_merge($defualts, $overwrite));
+			$this->ID = wp_insert_post(array_merge($defaults, $overwrite));
 			$this->_post = get_post($this->ID);
 			$this->triggerEvent('inserted');
 		}
@@ -989,7 +992,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 		foreach($this->attributes as $attribute){
 			$this->setMeta($attribute, $this->get($attribute, ''));
-		}	
+		}
 
 		$this->setMeta('_id', $this->ID);
 		$this->triggerEvent('saved');
@@ -1018,13 +1021,13 @@ Abstract Class WP_Model implements JsonSerializable
 	{
 		$this->triggerEvent('hardDeleting');
 
-		$defualts = [
+		$defaults = [
 			'ID'           => $this->ID,
 			'post_title'   => '',
 			'post_content' => '',
 		];
 
-		wp_update_post($defualts);
+		wp_update_post($defaults);
 
 		foreach($this->attributes as $attribute){
 			$this->deleteMeta($attribute);
