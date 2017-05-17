@@ -215,6 +215,22 @@ Abstract Class WP_Model implements JsonSerializable
 		return $reflection->newInstanceWithoutConstructor();
 	}
 
+	public static function extract($array, $column){
+		$return = [];
+
+		if(is_array($array)){
+			foreach($array as $value){
+				if(is_object($value)){
+					$return[] = @$value->$column;
+				}elseif(is_array($value)){
+					$return[] = @$value[$column];
+				}
+			}
+		}
+
+		return $return;
+	}
+
 	/**
 	 * Returns the post type
 	 * 
@@ -742,7 +758,7 @@ Abstract Class WP_Model implements JsonSerializable
 		$finderMethod = '_finder'.ucfirst($finder);
 		$class = get_called_class();
 		$model = $class::newWithoutConstructor();
-		if(!in_array($finderMethod, array_column(( new ReflectionClass(get_called_class()) )->getMethods(), 'name'))){
+		if(!in_array($finderMethod, Self::extract(( new ReflectionClass(get_called_class()) )->getMethods(), 'name'))){
 			throw new Exception("Finder method {$finderMethod} not found in {$class}");
 		}
 
@@ -757,7 +773,7 @@ Abstract Class WP_Model implements JsonSerializable
 		}
 
 		$postFinderMethod = '_postFinder'.ucfirst($finder);
-		if(in_array($postFinderMethod, array_column(( new ReflectionClass(get_called_class()) )->getMethods(), 'name'))){
+		if(in_array($postFinderMethod, Self::extract(( new ReflectionClass(get_called_class()) )->getMethods(), 'name'))){
 			return $model->$postFinderMethod($return, $arguments);
 		}
 
