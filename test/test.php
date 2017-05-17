@@ -540,6 +540,19 @@ function test(){
 		
 		// ---- findBypassBoot()
 		
+		// ---- mostRecent()
+			$products = Product::mostRecent(5);
+
+			dd($products);
+
+			if(! (count($products) === 5) ){
+
+				error(__LINE__ .' mostRecent()');
+			}
+
+			if(! (is_array($products)) ){
+				error(__LINE__ .' mostRecent()');
+			}
 		// ---- findOrFail()
 			try {
 				Product::findOrFail(9999999);

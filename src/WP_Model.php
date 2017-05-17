@@ -680,6 +680,23 @@ Abstract Class WP_Model implements JsonSerializable
 	}
 
 	/**
+	 * Find most recent models
+	 * @param  integer $limit
+	 * @return Array 
+	 */
+	public static function mostRecent($limit = 10){
+		$class = get_called_class();
+		return $class::finder('MostRecent__', ['limit' => $limit]);
+	}
+
+	public static function _finderMostRecent__($args){
+		return [
+			'posts_per_page' => (isset($args['limit'])? $args['limit'] : 3),
+    	];
+	}
+
+
+	/**
 	 * Find the model by ID. If the post does not exist throw.
 	 * 
 	 * @param  int $id
