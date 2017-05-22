@@ -170,6 +170,13 @@ Product::query()
     ->tax('taxonomy', 'field', 'operator', 'terms')
 ```
 
+#### Params() 
+An array of additional arguments for WP_Query.
+```php
+Product::query()
+    ->params(['orderby' => 'meta_value', 'order' => 'ASC])
+```
+
 #### Example
 
 ```php
@@ -185,6 +192,7 @@ $products = Product::query()
     ->tax('category', ['office', 'home'])
     ->tax('quality', 'slug', 'high')
     ->tax('county', 'term_id', 'NOT IN', [1, 5])
+    ->params(['orderby' => 'meta_value menu_order title'])
     ->execute();
 ```
 
