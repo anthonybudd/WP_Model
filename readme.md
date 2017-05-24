@@ -207,7 +207,7 @@ $product->delete();
 ```
 
 ### hardDelete()
-    hardDelete() will delete the post and set all of it's meta (in the database and in the object) to NULL.
+hardDelete() will delete the post and set all of it's meta (in the database and in the object) to NULL.
 
 ```php
 $product->hardDelete();
