@@ -4,9 +4,9 @@
 
 ### A simple class for creating active record, eloquent-esque models of WordPress Posts.
 
-###Introduction: [Medium Post](https://medium.com/@AnthonyBudd/wp-model-6887e1a24d3c)
+### Introduction: [Medium Post](https://medium.com/@AnthonyBudd/wp-model-6887e1a24d3c)
 
-###Advanced Functionality: [Medium Post](https://medium.com/@AnthonyBudd/wp-model-advanced-b44f117617a7)
+### Advanced Functionality: [Medium Post](https://medium.com/@AnthonyBudd/wp-model-advanced-b44f117617a7)
 
 
 ```php

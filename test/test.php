@@ -543,10 +543,7 @@ function test(){
 		// ---- mostRecent()
 			$products = Product::mostRecent(5);
 
-			dd($products);
-
 			if(! (count($products) === 5) ){
-
 				error(__LINE__ .' mostRecent()');
 			}
 
