@@ -1,4 +1,4 @@
-# WP_Model
+# WP_Model - Synthetic ORM for WordPress
 
 <p align="center"><img src="https://c1.staticflickr.com/1/415/31850480513_6cf2b5bdde_b.jpg"></p>
 
@@ -253,7 +253,7 @@ Class Product extends WP_Model
 {
     ...
 
-    publid $default = [
+    public $default = [
         'color' => 'black'
     ];
 }
@@ -271,12 +271,12 @@ Class Product extends WP_Model
 {
     ...
 
-    publid $filter = [
+    public $filter = [
         'weight'
     ];
 
     public function _filterWeight($value){
-        return intVal($value);
+        return intval($value);
     }
 }
 
