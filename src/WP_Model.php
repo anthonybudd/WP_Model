@@ -682,7 +682,7 @@ Abstract Class WP_Model implements JsonSerializable
 	/**
 	 * Find most recent models
 	 * @param  integer $limit
-	 * @return Array 
+	 * @return Array
 	 */
 	public static function mostRecent($limit = 10){
 		$class = get_called_class();
@@ -802,12 +802,16 @@ Abstract Class WP_Model implements JsonSerializable
 	 */
 	public static function where($key, $value = FALSE)
 	{
+		$params = [
+			'post_type' => Self::getPostType()
+		];
+		if ( is_array( $value ) ) {
+			$params = array_merge( $params, $value );
+		}
+
 		if(is_array($key)){
-			$params = [
-				'post_type'  => Self::getPostType(),
-				'meta_query' => [],
-				'tax_query'  => [],
-			];
+			if (!$params['meta_query']) { $params['meta_query'] = []; }
+			if (!$params['tax_query']) { $params['tax_query']  = []; }
 
 			foreach($key as $key_ => $meta){
 				if($key_ === 'meta_relation'){
@@ -831,19 +835,17 @@ Abstract Class WP_Model implements JsonSerializable
 				}
 			}
 
-			$query = new WP_Query($params);
 		}else{
-			$query = new WP_Query([
-				'post_type' 		=> Self::getPostType(),
-				'meta_query'        => [
-					[
-						'key'       => $key,
-						'value'     => $value,
-						'compare'   => '=',
-					],
-				]
-			]);
+			$params['meta_query'] = [
+				[
+					'key'     => $key,
+					'value'   => $value,
+					'compare' => '=',
+				],
+			];
 		}
+
+		$query = new WP_Query($params);
 
 		$arr = [];
 		foreach($query->get_posts() as $key => $post){
@@ -879,6 +881,12 @@ Abstract Class WP_Model implements JsonSerializable
 		$model = Self::newWithoutConstructor();
 		$model->_where = [];
 		return $model;
+	}
+
+	public function params( $extra = array() ) {
+		$this->_params = $extra;
+
+		return $this;
 	}
 
 	public function meta($key, $x, $y = NULL, $z = NULL){
@@ -933,11 +941,11 @@ Abstract Class WP_Model implements JsonSerializable
 	}
 
 	public function execute(){
-		return Self::where($this->_where);
+		return Self::where($this->_where, $this->_params);
 	}
 
 	public function executeAsoc($key){
-		$models = Self::where($this->_where);
+		$models = Self::where($this->_where, $this->_params);
 		return Self::asList($key, $models);
 	}
 
