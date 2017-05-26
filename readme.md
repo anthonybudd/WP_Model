@@ -1,4 +1,4 @@
-# WP_Model - Synthetic ORM for WordPress
+# WP_Model - Pseudo ORM for WordPress
 
 <p align="center"><img src="https://c1.staticflickr.com/1/415/31850480513_6cf2b5bdde_b.jpg"></p>
 
