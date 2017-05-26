@@ -3,6 +3,7 @@
 <p align="center"><img src="https://c1.staticflickr.com/1/415/31850480513_6cf2b5bdde_b.jpg"></p>
 
 ### A simple class for creating active record, eloquent-esque models of WordPress Posts.
+WP_Model provides a much needed update to the WordPress ORM. It's perfect if you need advanced data abstraction using a clean OOP style syntax. It has been specifically written so front-end developers could easily use it but powerful enough (virtual properties, events, etc) that it could be genuinely useful to back-end devs who want to make complex WP based projects.
 
 ### Introduction: [Medium Post](https://medium.com/@AnthonyBudd/wp-model-6887e1a24d3c)
 
@@ -29,13 +30,6 @@ $book->weight = 100;
 $book->save();
 
 ```
-
-***
-
-### In A Nutshell
-
-WP_Model provides a much needed update to the WordPress ORM. It's perfect if you need advanced data abstraction using a clean OOP style syntax. It has been specifically written so front-end developers could easily use it but powerful enough (virtual properties, events, etc) that it could be genuinely useful to back-end devs who want to make complex WP based projects.
-
 
 ***
 
