@@ -263,7 +263,10 @@ echo $product->color; // black
 ```
 
 ### Filter Properties
-If you need a property to be parsed before the are returned you can use a filter method. You must add the attribute name to a array named $filter and create a method prefixed with ‘_filter’, this method must take one argument, this will be the property value.
+If you need a property to be parsed before it is returned you can use a filter method. You must add the attribute name to a array named $filter and create a method prefixed with ‘_filter’, this method must take one argument, this will be the property value.
+
+Alternatively, if you want to send the value through an existing function (intval(), number_format(), your_function(), etc) you can do this by naming the desired function as the value using the assoc array syntax.
+Note: as the example code shows, you can use both methods of filtering simultaneously.
 
 ```php
 
@@ -272,6 +275,7 @@ Class Product extends WP_Model
     ...
 
     public $filter = [
+        'stock' => 'number_format',
         'weight'
     ];
 
@@ -281,10 +285,12 @@ Class Product extends WP_Model
 }
 
 $product = Product::insert([
-    'weight' => '250'
+    'stock' => '3450',
+    'weight' => '250',
 ]);
 
 echo $product->weight; // (int) 250
+echo $product->stock;  // (string) 3,450
 ```
 
 ***

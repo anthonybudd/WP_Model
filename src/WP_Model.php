@@ -300,15 +300,30 @@ Abstract Class WP_Model implements JsonSerializable
 	/**
      * Returns TRUE if $attribute is in the $filter array
      * and has a corresponding filter property method
+     * OR
+     * Returns TRUE if $attribute is in the $filter array
+     * and the $filter array is an asoc array (:318)
+     * and the value corresponding to the key ($attribute) has is the name of an exiting function.
      *
      * @param  string $attribute
 	 * @return bool
 	 */
 	public function isFilterProperty($attribute)
 	{
-		return (isset($this->filter) &&
-			in_array($attribute, $this->filter) &&
-			method_exists($this, ('_filter'. ucfirst($attribute))));
+		return (
+			(
+				isset($this->filter) &&
+				in_array($attribute, $this->filter) &&
+				method_exists($this, ('_filter'. ucfirst($attribute)))
+			) || (	
+				count(array_filter(array_keys($this->filter), 'is_string')) > 0 &&
+				isset($this->filter) &&
+				in_array($attribute, array_keys($this->filter)) &&
+				isset($this->filter[$attribute]) &&
+				function_exists($this->filter[$attribute])
+				
+			)
+		);
 	}
 
 	/**
@@ -319,6 +334,13 @@ Abstract Class WP_Model implements JsonSerializable
 	 */
 	public function getFilterProperty($attribute)
 	{
+		if( count(array_filter(array_keys($this->filter), 'is_string')) > 0 &&
+			isset($this->filter[$attribute]) &&
+			function_exists($this->filter[$attribute])) {
+	
+			return ($this->filter[$attribute]($this->get($attribute)));
+		}
+
 		return call_user_func_array([$this, ('_filter'. ucfirst($attribute))], [$this->get($attribute)]);
 	}
 

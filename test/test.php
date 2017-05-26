@@ -77,7 +77,9 @@ function test(){
 
 		// Filter
 		$product = Product::insert([
-		    'weight' => '250'
+		    'weight' => '250',
+		    'stock_left' => '50',
+		    'items_sold' => '5000'
 		]);
 
 		if(! (is_int($product->weight)) ){
@@ -85,6 +87,14 @@ function test(){
 		}
 
 		if(! ($product->weight === 250) ){
+			error(__LINE__ .' $default');
+		}
+
+		if(! (is_int($product->stock_left)) ){
+			error(__LINE__ .' $default');
+		}
+
+		if(! ($product->items_sold === '5,000') ){
 			error(__LINE__ .' $default');
 		}
 
