@@ -313,15 +313,16 @@ Abstract Class WP_Model implements JsonSerializable
 		return (
 			(
 				isset($this->filter) &&
+				is_array($this->filter) &&
 				in_array($attribute, $this->filter) &&
 				method_exists($this, ('_filter'. ucfirst($attribute)))
 			) || (	
-				count(array_filter(array_keys($this->filter), 'is_string')) > 0 &&
 				isset($this->filter) &&
+				is_array($this->filter) &&
+				count(array_filter(array_keys($this->filter), 'is_string')) > 0 &&
 				in_array($attribute, array_keys($this->filter)) &&
 				isset($this->filter[$attribute]) &&
 				function_exists($this->filter[$attribute])
-				
 			)
 		);
 	}
