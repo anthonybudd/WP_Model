@@ -558,7 +558,7 @@ Abstract Class WP_Model implements JsonSerializable
 	/**
 	 * Check if the post exists by Post ID
 	 *
-	 * @param  string|inte  $ID   Post ID
+	 * @param  string|int   $ID   Post ID
 	 * @param  bool 		$postTypeSafe Require post to be the same post type as the model
 	 * @return bool
 	 */
@@ -575,6 +575,17 @@ Abstract Class WP_Model implements JsonSerializable
 		}
 
 		return FALSE;
+	}
+
+	/**
+	 * Returns the total posts without using WP_Model::all()
+	 *
+	 * @return int
+	 */
+	public static function count()
+	{
+		$count = wp_count_posts(Self::getPostType());
+		return !is_null($count)? intval($count->publish) : 0;
 	}
 
 	/**

@@ -61,7 +61,6 @@ function error($debug, $info = '!!!'){
 
 function test(){
 
-
 	// -----------------------------------------------------
 	// PROPERTIES
 	// -----------------------------------------------------
@@ -73,7 +72,6 @@ function test(){
 		if(! ($product->color === 'black') ){
 			error(__LINE__ .' $default', $product);
 		}
-
 
 		// Filter
 		$product = Product::insert([
@@ -417,6 +415,11 @@ function test(){
 
 			if(! (Product::exists(0) === FALSE) ){
 				error(__LINE__ .' exists()');
+			}
+
+		// ---- count()
+			if(! ( is_int(Product::count())) ){
+				error(__LINE__ .' count()');
 			}
 	
 		// ---- post()
