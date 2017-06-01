@@ -582,10 +582,10 @@ Abstract Class WP_Model implements JsonSerializable
 	 *
 	 * @return int
 	 */
-	public static function count()
+	public static function count($postStatus = 'publish')
 	{
 		$count = wp_count_posts(Self::getPostType());
-		return !is_null($count)? intval($count->publish) : 0;
+		return !is_null($count)? (isset($count->$postStatus)? intval($count->$postStatus) : 0) : 0;
 	}
 
 	/**

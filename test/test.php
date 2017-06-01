@@ -421,6 +421,14 @@ function test(){
 			if(! ( is_int(Product::count())) ){
 				error(__LINE__ .' count()');
 			}
+
+			if(! ( is_int(Product::count('publish'))) ){
+				error(__LINE__ .' count()');
+			}
+
+			if(! ( Product::count('draft') == 0) ){
+				error(__LINE__ .' count()');
+			}
 	
 		// ---- post()
 			$product = Product::insert([

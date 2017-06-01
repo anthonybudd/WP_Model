@@ -463,7 +463,7 @@ Product::single(); // Returns the current model if on a single page or in the lo
 
 Product::exists(15); // Returns (bool) true or false
 
-Product::count(); // Efficient way to get the number of models (Don't use count(WP_Model::all()))
+Product::count($postStatus = 'publish'); // Efficient way to get the number of models (Don't use count(WP_Model::all()))
 
 $product->get($attribute, $default) // Get attribute from the model
 
