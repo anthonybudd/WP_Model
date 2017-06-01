@@ -750,6 +750,7 @@ Abstract Class WP_Model implements JsonSerializable
 			'posts_per_page' => $limit,
 			'order'          => 'DESC',
 			'orderby'        => 'id',
+			'post_status'    => ['publish'],
 		];
 
 		foreach((new WP_Query($args))->get_posts() as $post){
