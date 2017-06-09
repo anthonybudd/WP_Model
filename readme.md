@@ -432,7 +432,7 @@ Class Product extends WP_Model
 
 ### Helper Properties
 
-The $new property will return true if the model has not been saved in the Database yet.
+The $new property will return true if the model has not been saved in the database yet.
 
 The $dirty property will return true if the data in the model is different from what's currently stored in the database.
 
@@ -455,6 +455,8 @@ $product->content; // Post content
 
 
 ```
+
+***
 
 ### Helper Methods
 
@@ -494,6 +496,8 @@ Product::asList('post_title')
     17 => "Product 3"
 ]
 ```
+
+***
 
 ## Taxonomies
 

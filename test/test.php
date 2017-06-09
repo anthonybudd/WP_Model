@@ -96,7 +96,32 @@ function test(){
 			error(__LINE__ .' $default');
 		}
 
+	// -----------------------------------------------------
+	// VIRTUAL PROPERTIES
+	// -----------------------------------------------------
+		$product = Product::insert([
+			'title' => 'title',
+		    'content' => 'content'
+		]);
 
+		if(! ($product->title === 'title') ){
+			error(__LINE__ .' VIRTUAL PROPERTIES');
+		}
+
+		if(! ($product->content === 'content') ){
+			error(__LINE__ .' VIRTUAL PROPERTIES');
+		}
+
+		$product->save();
+		$product = Product::find($product->ID);
+
+		if(! ($product->title === 'title') ){
+			error(__LINE__ .' VIRTUAL PROPERTIES');
+		}
+
+		if(! ($product->content === 'content') ){
+			error(__LINE__ .' VIRTUAL PROPERTIES');
+		}
 
 	// -----------------------------------------------------
 	// EVENTS
