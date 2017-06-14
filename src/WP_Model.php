@@ -399,19 +399,19 @@ Abstract Class WP_Model implements JsonSerializable
 	 */
 	public function get($attribute, $default = NULL)
 	{
-		if(isset($this->data[$attribute])){
-			switch($attribute){
-				case 'the_content':
-					return apply_filters('the_content', $this->data[$attribute]);
-					break;
+		switch($attribute){
+			case 'the_content':
+				return apply_filters('the_content', $this->data['content']);
+				break;
 
-				default:
+			default:
+				if(isset($this->data[$attribute])){
 					return $this->data[$attribute];
-					break;
-			}
-		}
-
-		return $default;
+				}else{
+					return $default;
+				}
+				break;
+		}	
 	}
 
 	/**

@@ -112,6 +112,10 @@ function test(){
 			error(__LINE__ .' VIRTUAL PROPERTIES');
 		}
 
+		if(! ($product->the_content === "<p>content</p>\n") ){
+			error(__LINE__ .' VIRTUAL PROPERTIES');
+		}
+
 		$product->save();
 		$product = Product::find($product->ID);
 
@@ -120,6 +124,10 @@ function test(){
 		}
 
 		if(! ($product->content === 'content') ){
+			error(__LINE__ .' VIRTUAL PROPERTIES');
+		}
+
+		if(! ($product->the_content === "<p>content</p>\n") ){
 			error(__LINE__ .' VIRTUAL PROPERTIES');
 		}
 
