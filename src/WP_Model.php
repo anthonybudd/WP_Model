@@ -229,7 +229,7 @@ Abstract Class WP_Model implements JsonSerializable
 
  	private function getAttributes()
  	{
- 		return array_merge($this->attributes, ['title', 'content']);
+ 		return array_merge($this->attributes, ['title', 'content', 'the_content']);
  	}
 
 	/**
@@ -400,7 +400,15 @@ Abstract Class WP_Model implements JsonSerializable
 	public function get($attribute, $default = NULL)
 	{
 		if(isset($this->data[$attribute])){
-			return $this->data[$attribute];
+			switch($attribute){
+				case 'the_content':
+					return apply_filters('the_content', $this->data[$attribute]);
+					break;
+
+				default:
+					return $this->data[$attribute];
+					break;
+			}
 		}
 
 		return $default;
@@ -639,7 +647,7 @@ Abstract Class WP_Model implements JsonSerializable
 			if(!empty($this->protected) && !in_array($attribute, $this->protected)){
 				// Do not add to $model
 			}else{
-				$model[$attribute] = $this->get($attribute);
+				$model[$attribute] = $this->$attribute;
 			}
 		}
 
@@ -658,6 +666,10 @@ Abstract Class WP_Model implements JsonSerializable
 		$model['content'] = $this->content;
 
 		return $model;
+	}
+
+	public function postDate($format = 'd-m-Y'){
+		return date($format, strtotime($this->_post->post_date));
 	}
 
 	/**
