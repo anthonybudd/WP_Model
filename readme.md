@@ -59,13 +59,13 @@ If you need to prefix the model's data in your post_meta table add a public prop
 Class Product extends WP_Model
 {
     public $postType = 'product';
-    
-    public $prefix = 'wp_model_';
 
     public $attributes = [
         'color',
         'weight'
     ];
+    
+    public $prefix = 'wp_model_'; // Optional
 }
 ```
 
