@@ -68,7 +68,7 @@ If you need to prefix the model's data in your post_meta table add a public prop
 ***
 
 ### Register
-Before you can create a post you will need to register the post type. You can do this by calling the inherited static method register() in your functions.php file.
+Before you can create a post you will need to register the post type. You can do this by calling the static method register() in your functions.php file.
 ```php
 Product::register();
 
