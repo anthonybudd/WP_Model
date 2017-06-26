@@ -41,13 +41,10 @@ Require WP_Model with composer
 $ composer require anthonybudd/WP_Model
 ```
 
-#### Or
+**Or**
 
-Download the WP_Model class and require it at the top of your functions.php file.
+Download the WP_Model class and require it at the top of your functions.php file. This is not recommended. 
 
-```php
-    require 'src/WP_Model.php';
-```
 
 ***
 
