@@ -105,7 +105,7 @@ $product = Product::insert([
 ***
 
 ### Retrieving Models
-**Find()**
+**Find(int $ID)**
 
 find() will return an instantiated model if a post exists in the database with the ID if a post cannot be found it will return NULL.
 
@@ -113,7 +113,7 @@ find() will return an instantiated model if a post exists in the database with t
 $product = Product::find(15);
 ```
 
-**findOrFail()**
+**findOrFail(int $ID)**
 
 The findOrFail() method will throw an exception if a post of the correct type cannot be found in the database.
 
@@ -133,7 +133,7 @@ all() will return all posts. Use with caution.
 $allProducts = Product::all();
 ```
 
-**in()**
+**in(Array $IDs)**
 
 To find multiple posts by ID you can us the in() method.
 
@@ -143,9 +143,11 @@ $firstProducts = Product::in([1, 2, 3, 4]);
 
 ### Chainable Finders
 
-If you prefer to find your models using a chainable OOP style syntax the query() method is a  wrapper for the where() method. Each of the finder chainable finder methods meta() and tax can accept a varying amount of arguments. You must call the execute() method to run the query.
+If you prefer to find your models using a chainable OOP syntax the query() method is a  wrapper for the where() method. Each of the chainable finder methods meta() and tax can accept a varying amount of arguments. You must call the execute() method to run the query.
 
-**Meta()**
+**Meta(String $metaKey, String $metaValue)**
+**Meta(String $metaKey, [ String $compare, String $metaValue ])**
+**Meta(String $metaKey, [ String $compare, String $metaValue, String $type ])**
 ```php
 Product::query()
     ->meta('meta_key', 'meta_value')
@@ -153,7 +155,9 @@ Product::query()
     ->meta('meta_key', 'compare', meta_value', 'type')
 ```
 
-**Tax()**
+**Tax(String $taxonomy, Int|String|Array $terms)**
+**Tax(String $taxonomy, [ String $field, Int|String|Arra $term])**
+**Tax(String $taxonomy, [ String $field, String $operator, Int|String|Arra $terms])**
 ```php
 Product::query()
     ->tax('taxonomy', 'terms')
@@ -161,7 +165,7 @@ Product::query()
     ->tax('taxonomy', 'field', 'operator', 'terms')
 ```
 
-**Params()**
+**Params(Array $args)**
 An array of additional arguments for WP_Query.
 ```php
 Product::query()
@@ -189,21 +193,21 @@ $products = Product::query()
 
 ***
 ### Deleting
-**delete()**
+**delete(Int $ID)**
 delete() will trash the post.
 
 ```php
 $product = Product::find(15);
 $product->delete();
 ```
-**restore()**
+**restore(Int $ID)**
 restore() will unTrash the post and restore the model. You cannot restore hardDeleted models.
 
 ```php
 $product = Product::restore(15);
 ```
 
-**hardDelete()**
+**hardDelete(Int $ID)**
 hardDelete() will delete the post and set all of it's meta (in the database and in the object) to NULL.
 
 ```php
@@ -416,7 +420,8 @@ echo json_encode($product);
 ***
 ### Advanced Finding
 
-**Where()**
+**Where(String $metaKey, String $metaValue)**
+**Where(Array $WPQuery)**
 
 where() is a simple interface into WP_Query, the method can accept two string arguments meta_value and meta_key.
 
