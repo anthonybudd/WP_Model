@@ -422,7 +422,9 @@ echo json_encode($product);
 
 **Where()**
 
-where() is a simple interface into WP_Query, the method can accept two string arguments (meta_value and meta_key). For complex queries supply the method with a single array as the argument. The array will be automatically broken down into tax queries and meta queries, WP_Query will then be executed and will return an array of models.
+where() is a simple interface into WP_Query, the method can accept two string arguments meta_value and meta_key.
+
+For complex queries supply the method with a single array as the argument. The array will be automatically broken down into tax queries and meta queries, WP_Query will then be executed and will return an array of models.
 
 ```php
 $greenProducts = Product::where('color', 'green');
