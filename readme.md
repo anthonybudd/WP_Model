@@ -105,7 +105,7 @@ $product = Product::insert([
 ***
 
 ### Retrieving Models
-**Find(int $ID)**
+**Find()**
 
 find() will return an instantiated model if a post exists in the database with the ID if a post cannot be found it will return NULL.
 
@@ -113,7 +113,7 @@ find() will return an instantiated model if a post exists in the database with t
 $product = Product::find(15);
 ```
 
-**findOrFail(int $ID)**
+**findOrFail()**
 
 The findOrFail() method will throw an exception if a post of the correct type cannot be found in the database.
 
@@ -133,7 +133,7 @@ all() will return all posts. Use with caution.
 $allProducts = Product::all();
 ```
 
-**in(Array $IDs)**
+**in()**
 
 To find multiple posts by ID you can us the in() method.
 
@@ -145,9 +145,7 @@ $firstProducts = Product::in([1, 2, 3, 4]);
 
 If you prefer to find your models using a chainable OOP syntax the query() method is a  wrapper for the where() method. Each of the chainable finder methods meta() and tax can accept a varying amount of arguments. You must call the execute() method to run the query.
 
-**Meta(String $metaKey, String $metaValue)**
-**Meta(String $metaKey, [ String $compare, String $metaValue ])**
-**Meta(String $metaKey, [ String $compare, String $metaValue, String $type ])**
+**Meta()**
 ```php
 Product::query()
     ->meta('meta_key', 'meta_value')
@@ -155,9 +153,7 @@ Product::query()
     ->meta('meta_key', 'compare', meta_value', 'type')
 ```
 
-**Tax(String $taxonomy, Int|String|Array $terms)**
-**Tax(String $taxonomy, [ String $field, Int|String|Arra $term])**
-**Tax(String $taxonomy, [ String $field, String $operator, Int|String|Arra $terms])**
+**Tax()**
 ```php
 Product::query()
     ->tax('taxonomy', 'terms')
@@ -165,7 +161,8 @@ Product::query()
     ->tax('taxonomy', 'field', 'operator', 'terms')
 ```
 
-**Params(Array $args)**
+**Params()**
+
 An array of additional arguments for WP_Query.
 ```php
 Product::query()
@@ -193,21 +190,24 @@ $products = Product::query()
 
 ***
 ### Deleting
-**delete(Int $ID)**
+**delete()**
+
 delete() will trash the post.
 
 ```php
 $product = Product::find(15);
 $product->delete();
 ```
-**restore(Int $ID)**
+**restore()**
+
 restore() will unTrash the post and restore the model. You cannot restore hardDeleted models.
 
 ```php
 $product = Product::restore(15);
 ```
 
-**hardDelete(Int $ID)**
+**hardDelete()**
+
 hardDelete() will delete the post and set all of it's meta (in the database and in the object) to NULL.
 
 ```php
