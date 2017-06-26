@@ -50,8 +50,6 @@ Download the WP_Model class and require it at the top of your functions.php file
 
 ### Setup
 You will then need to make a class that extends WP_Model. This class will need the public property $postType and $attributes, an array of strings.
-
-If you need to prefix the model's data in your post_meta table add a public property $prefix. This will be added to the post meta so the attribute 'color' will be saved in the database using the meta_key 'wp_model_color'
 ```php
 Class Product extends WP_Model
 {
@@ -65,12 +63,12 @@ Class Product extends WP_Model
     public $prefix = 'wp_model_'; // Optional
 }
 ```
+If you need to prefix the model's data in your post_meta table add a public property $prefix. This will be added to the post meta so the attribute 'color' will be saved in the database using the meta_key 'wp_model_color'
 
 ***
 
 ### Register
 Before you can create a post you will need to register the post type. You can do this by calling the inherited static method register() in your functions.php file.
-Optionally, you can also provide this method with an array of arguments, this array will be sent directly to the second argument of Wordpress's [register_post_type()](https://codex.wordpress.org/Function_Reference/register_post_type) function.
 ```php
 Product::register();
 
@@ -78,6 +76,7 @@ Product::register([
     'singular_name' => 'Product'
 ]);
 ```
+Optionally, you can also provide this method with an array of arguments, this array will be sent directly to the second argument of Wordpress's [register_post_type()](https://codex.wordpress.org/Function_Reference/register_post_type) function.
 
 ***
 
