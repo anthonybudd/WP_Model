@@ -33,7 +33,7 @@ $book->save();
 
 ***
 
-### Installation
+# Installation
 
 Require WP_Model with composer
 
@@ -48,7 +48,7 @@ Download the WP_Model class and require it at the top of your functions.php file
 
 ***
 
-### Setup
+# Setup
 You will then need to make a class that extends WP_Model. This class will need the public property $postType and $attributes, an array of strings.
 ```php
 Class Product extends WP_Model
@@ -67,7 +67,7 @@ If you need to prefix the model's data in your post_meta table add a public prop
 
 ***
 
-### Register
+# Register
 Before you can create a post you will need to register the post type. You can do this by calling the static method register() in your functions.php file.
 ```php
 Product::register();
@@ -80,7 +80,7 @@ Optionally, you can also provide this method with an array of arguments, this ar
 
 ***
 
-### Creating and saving models
+# Creating and Saving
 You can create a model using the following methods.
 ```php
 $product = new Product();
@@ -104,7 +104,7 @@ $product = Product::insert([
 
 ***
 
-### Retrieving Models
+# Retrieving Models
 **Find()**
 
 find() will return an instantiated model if a post exists in the database with the ID if a post cannot be found it will return NULL.
@@ -141,7 +141,7 @@ To find multiple posts by ID you can us the in() method.
 $firstProducts = Product::in([1, 2, 3, 4]);
 ```
 
-### Chainable Finders
+## Chainable Finders
 
 If you prefer to find your models using a chainable OOP syntax the query() method is a  wrapper for the where() method. Each of the chainable finder methods meta() and tax can accept a varying amount of arguments. You must call the execute() method to run the query.
 
@@ -189,7 +189,7 @@ $products = Product::query()
 ```
 
 ***
-### Deleting
+# Deleting
 **delete()**
 
 delete() will trash the post.
@@ -216,7 +216,7 @@ $product->hardDelete();
 
 
 ***
-### Helper Properties
+# Helper Properties
 
 The $new property will return true if the model has not been saved in the database yet.
 
@@ -244,7 +244,7 @@ $product->the_content; // Returns the post's content via the 'the_content' filte
 
 ***
 
-### Helper Methods
+# Helper Methods
 
 ```php
 Product::single(); // Returns the current model if on a single page or in the loop
@@ -291,7 +291,7 @@ Product::asList('post_title')
 
 ***
 
-### Virtual Properties
+# Virtual Properties
 If you would like to add virtual properties to your models, you can do this by adding a method named the virtual property's name prefixed with '_get'
 
 ```php
@@ -314,7 +314,7 @@ $product = Product::find(15);
 echo $product->humanWeight;
 ```
 
-### Default Properties
+# Default Properties
 To set default values for the attributes in your model use the $default property. The key of this array will be the attribute you wish to set a default value for and the value will be the default value.
 
 ```php
@@ -332,7 +332,7 @@ $product = new Product;
 echo $product->color; // black
 ```
 
-### Filter Properties
+# Filter Properties
 If you need a property to be parsed before it is returned you can use a filter method. You must add the attribute name to a array named $filter and create a method prefixed with ‘_filter’, this method must take one argument, this will be the property value.
 
 Alternatively, if you want to send the value through an existing function (intval(), number_format(), your_function(), etc) you can do this by naming the desired function as the value using the assoc array syntax.
@@ -376,7 +376,7 @@ $product->related; // (array) [Product, Product, Product]
 **Note:** WP_Model dynamically loads child models as and when they are requested. If you dump the model without explicitly requesting the child model (eg $product->seller) the parent model will only store the child model's ID.
 ***
 
-### Serialization
+# Serialization
 
 If you want to JSON encode a model and keep virtual properties you can do this by adding the property $serialize to the model.
 
@@ -418,7 +418,7 @@ echo json_encode($product);
 ```
 
 ***
-### Advanced Finding
+# Advanced Finding
 
 **Where(String $metaKey, String $metaValue)**
 **Where(Array $WPQuery)**
@@ -505,7 +505,7 @@ $heavyProducts = Product::finder('heavyWithArgs', ['page' => 3]);
 ***
 
 
-### Events
+# Events
 WP_Model has an events system, this is the best way to hook into WP_Model's core functions. All events with the suffix -ing fire as soon as the method has been called. All events with the suffix -ed will be fired at the very end of the method. Below is a list of available events. All events will be supplied with the model that triggered the event
 
 You can also trigger the save, insert and delete events from the admin section of wordpress.
@@ -540,7 +540,7 @@ Class Product extends WP_Model
 ```
 ***
 
-## Taxonomies
+# Taxonomies
 
 If you would like to have any taxonomies loaded into the model, add the optional public property $taxonomies (array of taxonomy slugs) to the class.
 ```php
