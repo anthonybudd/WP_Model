@@ -117,8 +117,9 @@ find() will return an instantiated model if a post exists in the database with t
 $product = Product::find(15);
 ```
 
-**findorFail()**
-findorFail() will throw an exception if a post of the correct type cannot be found in the database.
+**findOrFail()**
+
+The findOrFail() method will throw an exception if a post of the correct type cannot be found in the database.
 
 ```php
 try {
