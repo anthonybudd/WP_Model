@@ -31,8 +31,6 @@ $book->save();
 
 ```
 
-***
-
 # Installation
 
 Require WP_Model with composer
@@ -45,8 +43,6 @@ $ composer require anthonybudd/WP_Model
 
 Download the WP_Model class and require it at the top of your functions.php file. This is not recommended. 
 
-
-***
 
 # Setup
 You will then need to make a class that extends WP_Model. This class will need the public property $postType and $attributes, an array of strings.
@@ -65,7 +61,6 @@ Class Product extends WP_Model
 ```
 If you need to prefix the model's data in your post_meta table add a public property $prefix. This will be added to the post meta so the attribute 'color' will be saved in the database using the meta_key 'wp_model_color'
 
-***
 
 # Register
 Before you can create a post you will need to register the post type. You can do this by calling the static method register() in your functions.php file.
@@ -78,7 +73,6 @@ Product::register([
 ```
 Optionally, you can also provide this method with an array of arguments, this array will be sent directly to the second argument of Wordpress's [register_post_type()](https://codex.wordpress.org/Function_Reference/register_post_type) function.
 
-***
 
 # Creating and Saving
 You can create a model using the following methods.
@@ -102,7 +96,6 @@ $product = Product::insert([
 ]);
 ```
 
-***
 
 # Retrieving Models
 **Find()**
@@ -188,7 +181,6 @@ $products = Product::query()
     ->execute();
 ```
 
-***
 # Deleting
 **delete()**
 
@@ -214,8 +206,6 @@ hardDelete() will delete the post and set all of it's meta (in the database and 
 $product->hardDelete();
 ```
 
-
-***
 # Helper Properties
 
 The $new property will return true if the model has not been saved in the database yet.
@@ -242,7 +232,6 @@ $product->content; // Returns the post's content
 $product->the_content; // Returns the post's content via the 'the_content' filter
 ```
 
-***
 
 # Helper Methods
 
@@ -288,8 +277,6 @@ Product::asList('post_title')
     17 => "Product 3"
 ]
 ```
-
-***
 
 # Virtual Properties
 If you would like to add virtual properties to your models, you can do this by adding a method named the virtual property's name prefixed with '_get'
@@ -374,7 +361,6 @@ $product->seller;  // (object) Seller
 $product->related; // (array) [Product, Product, Product]
 ```
 **Note:** WP_Model dynamically loads child models as and when they are requested. If you dump the model without explicitly requesting the child model (eg $product->seller) the parent model will only store the child model's ID.
-***
 
 # Serialization
 
@@ -417,7 +403,6 @@ echo json_encode($product);
 }
 ```
 
-***
 # Advanced Finding
 
 **Where(String $metaKey, String $metaValue)**
@@ -502,9 +487,6 @@ $heavyProducts = Product::finder('heavy');
 $heavyProducts = Product::finder('heavyWithArgs', ['page' => 3]); 
 ```
 
-***
-
-
 # Events
 WP_Model has an events system, this is the best way to hook into WP_Model's core functions. All events with the suffix -ing fire as soon as the method has been called. All events with the suffix -ed will be fired at the very end of the method. Below is a list of available events. All events will be supplied with the model that triggered the event
 
@@ -538,7 +520,6 @@ Class Product extends WP_Model
     }
 }
 ```
-***
 
 # Taxonomies
 
