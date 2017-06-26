@@ -2,12 +2,12 @@
 
 <p align="center"><img src="https://c1.staticflickr.com/1/415/31850480513_6cf2b5bdde_b.jpg"></p>
 
-### A simple class for creating active record, eloquent-esque models of WordPress Posts.
-WP_Model provides a much needed update to the WordPress ORM. It's perfect if you need advanced data abstraction using a clean OOP style syntax. It has been specifically written so front-end developers could easily use it but powerful enough (virtual properties, events, etc) that it could be genuinely useful to back-end devs who want to make complex WP based projects.
+### A simple class for creating active record models of WordPress Posts.
+WP_Model is a pseudo ORM for WordPress. Designed to provide a better method for handling posts using a simple OOP style syntax. WP_Model has been specifically designed to be easy as possible for front-end developers (helper methods, taxonomies) and developers with an entry level knowledge of PHP but powerful enough (virtual properties, relationships, events) that it could be genuinely useful to back-end devs who want to make complex WP based projects.
 
-### Introduction: [Medium Post](https://medium.com/@AnthonyBudd/wp-model-6887e1a24d3c)
+#### Introduction: **[Medium Post](https://medium.com/@AnthonyBudd/wp-model-6887e1a24d3c)**
 
-### Advanced Functionality: [Medium Post](https://medium.com/@AnthonyBudd/wp-model-advanced-b44f117617a7)
+#### Advanced Functionality: **[Medium Post](https://medium.com/@AnthonyBudd/wp-model-advanced-b44f117617a7)**
 
 
 ```php
@@ -108,15 +108,16 @@ $product = Product::insert([
 
 ***
 
-## Retrieving Posts
-### Find()
+### Retrieving Models
+**Find()**
 
-find() will return an instanciated model if a post exists in the database with the ID if a post cannot be found it will return NULL.
+find() will return an instantiated model if a post exists in the database with the ID if a post cannot be found it will return NULL.
 
 ```php
 $product = Product::find(15);
 ```
 
+**findorFail()**
 findorFail() will throw an exception if a post of the correct type cannot be found in the database.
 
 ```php
@@ -127,7 +128,7 @@ try {
 }
 ```
 
-### All()
+**all()**
 
 all() will return all posts. Use with caution.
 
@@ -135,12 +136,11 @@ all() will return all posts. Use with caution.
 $allProducts = Product::all();
 ```
 
-### In()
+**in()**
 
 To find multiple posts by ID you can us the in() method.
 
 ```php
-$firstProducts = Product::in(1, 2, 3, 4);
 $firstProducts = Product::in([1, 2, 3, 4]);
 ```
 
@@ -148,7 +148,7 @@ $firstProducts = Product::in([1, 2, 3, 4]);
 
 If you prefer to find your models using a chainable OOP style syntax the query() method is a  wrapper for the where() method. Each of the finder chainable finder methods meta() and tax can accept a varying amount of arguments. You must call the execute() method to run the query.
 
-#### Meta()
+**Meta()**
 ```php
 Product::query()
     ->meta('meta_key', 'meta_value')
@@ -156,7 +156,7 @@ Product::query()
     ->meta('meta_key', 'compare', meta_value', 'type')
 ```
 
-#### Tax()
+**Tax()**
 ```php
 Product::query()
     ->tax('taxonomy', 'terms')
@@ -164,14 +164,14 @@ Product::query()
     ->tax('taxonomy', 'field', 'operator', 'terms')
 ```
 
-#### Params() 
+**Params()**
 An array of additional arguments for WP_Query.
 ```php
 Product::query()
     ->params(['orderby' => 'meta_value', 'order' => 'ASC])
 ```
 
-#### Example
+#### Example:
 
 ```php
 $products = Product::query()
@@ -191,26 +191,101 @@ $products = Product::query()
 ```
 
 ***
-
-### Delete()
+### Deleting
+**delete()**
 delete() will trash the post.
 
 ```php
 $product = Product::find(15);
 $product->delete();
 ```
+**restore()**
+restore() will unTrash the post and restore the model. You cannot restore hardDeleted models.
 
-### hardDelete()
+```php
+$product = Product::restore(15);
+```
+
+**hardDelete()**
 hardDelete() will delete the post and set all of it's meta (in the database and in the object) to NULL.
 
 ```php
 $product->hardDelete();
 ```
 
-restore() will unTrash the post and restore the model. You cannot restore hardDeleted models.
+
+***
+### Helper Properties
+
+The $new property will return true if the model has not been saved in the database yet.
+
+The $dirty property will return true if the data in the model is different from what's currently stored in the database.
+
 
 ```php
-$product = Product::restore(15);
+$product = new Product;
+$product->new; // Returns (bool) true
+
+$product = Product::find(15);
+$product->new; // Returns (bool) false
+
+$product->color = 'red';
+$product->dirty; // Returns (bool) true
+$product->save();
+$product->dirty; // Returns (bool) false
+
+$product->title; // Returns the post's title
+
+$product->content; // Returns the post's content
+
+$product->the_content; // Returns the post's content via the 'the_content' filter
+```
+
+***
+
+### Helper Methods
+
+```php
+Product::single(); // Returns the current model if on a single page or in the loop
+
+Product::exists(15); // Returns (bool) true or false
+
+Product::mostRecent($limit = 1); // Returns the most recent post
+
+Product::mostRecent(10); // Returns the most recent 10 posts [Product, Product, Product, Product]
+
+Product::count($postStatus = 'publish'); // Efficient way to get the number of models (Don't use count(WP_Model::all()))
+
+$product->postDate($format = 'd-m-Y'); // Returns the post date based on the format supplied
+
+$product->get($attribute, $default) // Get attribute from the model
+
+$product->set($attribute, $value) // Set attribute of the model
+
+$product->post() // Returns the WP_Post object (This will be the post at load, any updates to the post (title, content, etc) will not be reflected)
+
+$product->permalink() // Returns the post permalink
+
+$product->hasFeaturedImage() // Returns TRUE if a featured image has been set or FALSE if not
+
+$product->featuredImage($defaultURL) // Returns the featured image URL
+
+$product->toArray() // Returns an array representation of the model
+
+Product::asList() // Returns array of posts keyed by the post's ID
+[
+    15 => Product,
+    16 => Product,
+    17 => Product
+]
+
+// You can also specify the value of each element in the array to be meta from the model.
+Product::asList('post_title')
+[
+    15 => "Product 1",
+    16 => "Product 2",
+    17 => "Product 3"
+]
 ```
 
 ***
@@ -262,6 +337,7 @@ If you need a property to be parsed before it is returned you can use a filter m
 Alternatively, if you want to send the value through an existing function (intval(), number_format(), your_function(), etc) you can do this by naming the desired function as the value using the assoc array syntax.
 Note: as the example code shows, you can use both methods of filtering simultaneously.
 
+When you set an attribute's value to an object that is an instance of WP_Model or when you save an array of WP_Models, both will result in the model(s) being saved individually. The parent model will only store the child models IDs (or array of IDs). To retrieve these attribute values as instantiated models set the filter property value to the class of the desired model. 
 ```php
 
 Class Product extends WP_Model
@@ -269,8 +345,10 @@ Class Product extends WP_Model
     ...
 
     public $filter = [
-        'stock' => 'number_format',
         'weight'
+        'stock' => 'number_format',
+        'seller' => Seller::class,
+        'related' => Product::class,
     ];
 
     public function _filterWeight($value){
@@ -279,14 +357,22 @@ Class Product extends WP_Model
 }
 
 $product = Product::insert([
+    'weight' => 250,
     'stock' => '3450',
-    'weight' => '250',
+    'seller' => Seller::find(3),
+    'related' => [
+        new Product,
+        new Product,
+        new Product,
+    ]
 ]);
 
-echo $product->weight; // (int) 250
-echo $product->stock;  // (string) 3,450
+$product->weight;  // (int) 250
+$product->stock;   // (string) 3,450
+$product->seller;  // (object) Seller
+$product->related; // (array) [Product, Product, Product]
 ```
-
+**Note:** WP_Model dynamically loads child models as and when they are requested. If you dump the model without explicitly requesting the child model (eg $product->seller) the parent model will only store the child model's ID.
 ***
 
 ### Serialization
@@ -319,7 +405,7 @@ $product = Product::find(15);
 echo json_encode($product);
 ```
 
-Result:
+**Result:**
 ```json
 {
     "ID":           15,
@@ -333,7 +419,7 @@ Result:
 ***
 ### Advanced Finding
 
-#### Where()
+**Where()**
 
 where() is a simple interface into WP_Query, the method can accept two string arguments (meta_value and meta_key). For complex queries supply the method with a single array as the argument. The array will be automatically broken down into tax queries and meta queries, WP_Query will then be executed and will return an array of models.
 
@@ -352,10 +438,9 @@ $otherProducts = Product::where([
 ]);
 ```
 
-#### Custom Finders
+**finder()**
 
-The finder() method allows you to create a custom finder method.
-To create a custom finder first make a method in your model named your finders name and prefixed with '_finder' this method must return an array. The array will be given directly to the constructer of a WP_Query. The results of the WP_Query will be returned by the finder() method.
+The finder() method allows you to create a custom finder method, this is the best way to contain frequently used WP_Querys inside your model's class. To create a custom finder first make a method in your model named your finders name and prefixed with '_finder', this method must return an array. The array will be given directly to the constructor of a WP_Query. The results of the WP_Query will be returned by the finder() method. You can provide additional arguments to the finder method by providing an array to the second argument of the static method finder() as shown below ('heavyWithArgs').
 
 If you would like to post-process the results of your custom finder you can add a '_postFinder' method. This method must accept one argument which will be the array of found posts.
 
@@ -365,7 +450,7 @@ Class Product extends WP_Model
 {
     ...
 
-    public function _finderHeavy()
+    public function _finderHeavy($args)
     {  
         return [
             'meta_query' => [
@@ -388,9 +473,29 @@ Class Product extends WP_Model
             }
         }, $results);
     }
+
+
+    // Finder with optional args
+    public function _finderHeavyWithArgs($args)
+    {  
+        return [
+            'paged'      => $args['page'], // 3
+            'meta_query' => [
+                [
+                    'key' => 'weight',
+                    'compare' => '>',
+                    'type' => 'NUMERIC',
+                    'value' => '1000'
+                ]
+            ]
+        ];
+    }
 }
 
 $heavyProducts = Product::finder('heavy');
+
+// Finder with optional args
+$heavyProducts = Product::finder('heavyWithArgs', ['page' => 3]); 
 ```
 
 ***
@@ -429,74 +534,6 @@ Class Product extends WP_Model
     }
 }
 ```
-
-### Helper Properties
-
-The $new property will return true if the model has not been saved in the database yet.
-
-The $dirty property will return true if the data in the model is different from what's currently stored in the database.
-
-
-```php
-$product = new Product;
-$product->new; // Returns (bool) true
-
-$product = Product::find(15);
-$product->new; // Returns (bool) false
-
-$product->color = 'red';
-$product->dirty; // Returns (bool) true
-$product->save();
-$product->dirty; // Returns (bool) false
-
-$product->title; // Post title
-
-$product->content; // Post content
-
-
-```
-
-***
-
-### Helper Methods
-
-```php
-Product::single(); // Returns the current model if on a single page or in the loop
-
-Product::exists(15); // Returns (bool) true or false
-
-Product::count($postStatus = 'publish'); // Efficient way to get the number of models (Don't use count(WP_Model::all()))
-
-$product->get($attribute, $default) // Get attribute from the model
-
-$product->set($attribute, $value) // Set attribute of the model
-
-$product->post() // Returns WP_Post object
-
-$product->permalink() // Returns post permalink
-
-$product->hasFeaturedImage() // Returns TRUE if a featured image has been set or FALSE if not
-
-$product->featuredImage($defaultURL) // Returns featured image URL
-
-$product->toArray() // Returns an array representaion of the model
-
-Product::asList() // Returns array of posts keyed by the post's ID
-[
-    15 => Product,
-    16 => Product,
-    17 => Product
-]
-
-// You can also specify the value of each element in the array to be meta from the model.
-Product::asList('post_title')
-[
-    15 => "Product 1",
-    16 => "Product 2",
-    17 => "Product 3"
-]
-```
-
 ***
 
 ## Taxonomies
@@ -561,7 +598,4 @@ $product->clearTaxonomy('category');
 $product->getTaxonomy('category'); // [];
 ```
 
-No change to the models taxonomies will be committed to the database until you call the save() method.
-
-
-***
+No change to the models taxonomies will be written to the database until you call the save() method.

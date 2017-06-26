@@ -33,7 +33,15 @@ function setup(){
 		'rewrite' => array('slug' => 'category')
 	]);
 
+	if(!class_exists('Product')){
+		require 'Product.php';
+	}
 	Product::register();
+
+	if(!class_exists('Order')){
+		require 'Order.php';
+	}
+	Order::register();
 }
 
 function runTests(){
@@ -515,6 +523,17 @@ function test(){
 		// ---- single()
 	
 		// ---- permalink()
+
+		// ---- postDate()
+		$product = Product::insert([
+			'title' => 'product',
+		    'color' => 'blue',
+		    'weight' => '250'
+		]);
+
+		if(! ($product->postDate() === date('d-m-Y')) ){
+			error(__LINE__ .' postDate()');
+		}
 			
 
 	// -----------------------------------------------------
@@ -595,6 +614,12 @@ function test(){
 		// ---- findBypassBoot()
 		
 		// ---- mostRecent()
+			$product = Product::mostRecent();
+
+			if(! (is_object($product)) ){
+				error(__LINE__ .' mostRecent()');
+			}
+
 			$products = Product::mostRecent(5);
 
 			if(! (count($products) === 5) ){
@@ -604,6 +629,7 @@ function test(){
 			if(! (is_array($products)) ){
 				error(__LINE__ .' mostRecent()');
 			}
+
 		// ---- findOrFail()
 			try {
 				Product::findOrFail(9999999);
@@ -763,6 +789,51 @@ function test(){
 			
 			if(! (count($product2->category) === 1) ){
 				error(__LINE__ .' save()', $product2);
+			}
+
+		// ---- save models
+			$savedProduct = Product::insert([
+				'title' => 'product',
+			]);
+
+			$order = new Order;
+			$order->saved_product = $savedProduct->ID;
+			$order->product = new Product;
+			$order->products = [
+				$savedProduct,
+				new Product,
+				new Product,
+			];
+
+			$order->save();
+
+
+			if(! (gettype($order->saved_product) === 'object') ){
+				error(__LINE__ .' save()');
+			}
+
+			if(! ($order->saved_product instanceof WP_Model) ){
+				error(__LINE__ .' save()');
+			}
+
+			if(! (gettype($order->product) === 'object') ){
+				error(__LINE__ .' save()');
+			}
+
+			if(! ($order->product instanceof WP_Model) ){
+				error(__LINE__ .' save()');
+			}
+
+			if(! ($order->product->new === FALSE) ){
+				error(__LINE__ .' save()');
+			}
+
+			if(! (is_array($order->products)) ){
+				error(__LINE__ .' save()');
+			}
+
+			if(! ($order->products[0] instanceof WP_Model) ){
+				error(__LINE__ .' save()');
 			}
 		
 

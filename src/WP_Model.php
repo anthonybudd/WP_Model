@@ -7,7 +7,6 @@
  * record, eloquent-esque models of WordPress Posts.
  *
  * @author     AnthonyBudd <anthonybudd94@gmail.com>
- * @todo date format, 
  */
 Abstract Class WP_Model implements JsonSerializable
 {
@@ -165,7 +164,7 @@ Abstract Class WP_Model implements JsonSerializable
 	 */
 	public static function addHooks()
 	{
-		add_action(('save_post'), [get_called_class(), 'onSave'], 9999999999);
+		add_action('save_post', [get_called_class(), 'onSave'], 9999999999);
 	}
 
  	/**
@@ -175,7 +174,7 @@ Abstract Class WP_Model implements JsonSerializable
 	 */
 	public static function removeHooks()
 	{
-		remove_action(('save_post'), [get_called_class(), 'onSave'], 9999999999);
+		remove_action('save_post', [get_called_class(), 'onSave'], 9999999999);
 	}
 
 	/**
@@ -188,7 +187,7 @@ Abstract Class WP_Model implements JsonSerializable
 	 */
 	public static function onSave($ID)
 	{
-		if(get_post_status($ID) === 'publish' && Self::exists($ID)){
+		if(Self::exists($ID)){
 			$post = Self::find($ID);
 			$post->save();
 		}
@@ -208,6 +207,15 @@ Abstract Class WP_Model implements JsonSerializable
 		$class = get_called_class();
 		$reflection = new ReflectionClass($class);
 		return $reflection->newInstanceWithoutConstructor();
+	}
+
+	public function isArrayOfModels($array){
+		if(!is_array($array)){
+			return FALSE;
+		}
+
+		$types = array_unique(array_map('gettype', $array));
+		return (count($types) === 1 && $types[0] === "object" && $array[0] instanceof WP_Model);
 	}
 
 	public static function extract($array, $column)
@@ -323,7 +331,11 @@ Abstract Class WP_Model implements JsonSerializable
 				count(array_filter(array_keys($this->filter), 'is_string')) > 0 &&
 				in_array($attribute, array_keys($this->filter)) &&
 				isset($this->filter[$attribute]) &&
-				function_exists($this->filter[$attribute])
+				(
+					function_exists($this->filter[$attribute]) || 
+					$this->filter[$attribute] === 'the_content' ||
+					class_exists($this->filter[$attribute])
+				)
 			)
 		);
 	}
@@ -337,10 +349,37 @@ Abstract Class WP_Model implements JsonSerializable
 	public function getFilterProperty($attribute)
 	{
 		if( count(array_filter(array_keys($this->filter), 'is_string')) > 0 &&
-			isset($this->filter[$attribute]) &&
-			function_exists($this->filter[$attribute])) {
-	
-			return ($this->filter[$attribute]($this->get($attribute)));
+			isset($this->filter[$attribute])){
+
+			if($this->filter[$attribute] === 'the_content'){
+				return apply_filters('the_content', $this->get($attribute));
+			}elseif(function_exists($this->filter[$attribute])){
+				return ($this->filter[$attribute]($this->get($attribute)));
+			}elseif(class_exists($this->filter[$attribute])){
+
+				$className = $this->filter[$attribute];
+				if(is_array($this->get($attribute))){
+					if($this->isArrayOfModels($this->get($attribute))){
+						return $this->get($attribute);
+					}
+
+					$return = [];
+					foreach($this->get($attribute) as $model){
+						if($className::exists($model)){
+							$return[] = $className::find($model);
+						}
+					}
+
+					return $this->{$attribute} = &$return;
+				}else{
+					if(is_object($this->get($attribute))){
+						return $this->get($attribute);
+					}
+					return $this->{$attribute} = $className::find($this->get($attribute)); 
+				}
+			}
+
+			return NULL;
 		}
 
 		return call_user_func_array([$this, ('_filter'. ucfirst($attribute))], [$this->get($attribute)]);
@@ -370,6 +409,25 @@ Abstract Class WP_Model implements JsonSerializable
 	 */
 	public function setMeta($key, $value)
 	{
+		if(is_object($value) && $value instanceof WP_Model){
+			if($value->new || $value->dirty){
+				$value->save();
+			}
+
+			$value = $value->ID;
+		}elseif($this->isArrayOfModels($value)){
+		   	$IDs = [];
+			foreach($value as $model){
+				if($model->new || $model->dirty){
+					$model->save();
+				}
+
+				$IDs[] = $model->ID;
+			}
+
+			$value = $IDs;	
+		}
+
 		update_post_meta($this->ID, ($this->prefix.$key), $value);
 	}
 
@@ -481,7 +539,7 @@ Abstract Class WP_Model implements JsonSerializable
 		if(isset($this->taxonomies) && isset($this->tax_data[$attribute])){
 			return array_map(function($tax) use ($param){
 				if(!is_null($param)){
-					return $tax->$param;
+					return $tax->{$param};
 				}
 
 				return $tax;
@@ -736,7 +794,7 @@ Abstract Class WP_Model implements JsonSerializable
 	 * @param  integer $limit
 	 * @return Array
 	 */
-	public static function mostRecent($limit = 10)
+	public static function mostRecent($limit = 1)
 	{
 		$class = get_called_class();
 		return $class::finder('MostRecent__', ['limit' => $limit]);
@@ -747,6 +805,15 @@ Abstract Class WP_Model implements JsonSerializable
 		return [
 			'posts_per_page' => (isset($args['limit'])? $args['limit'] : 3),
     	];
+	}
+
+	public static function _postFinderMostRecent__($results, $args)
+	{
+		if($args['limit'] == '1'){
+			return @$results[0];
+		}
+
+		return $results;
 	}
 
 
@@ -1032,7 +1099,7 @@ Abstract Class WP_Model implements JsonSerializable
 
 		Self::removeHooks();
 
-		if(is_integer($this->ID)){
+		if(!is_null($this->ID)){
 			$defaults = [
 				'ID'           => $this->ID,
 				'post_title'   => $this->title,
