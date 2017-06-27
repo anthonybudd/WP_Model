@@ -98,7 +98,7 @@ $product = Product::insert([
 
 
 # Retrieving Models
-**Find()**
+**find()**
 
 find() will return an instantiated model if a post exists in the database with the ID if a post cannot be found it will return NULL.
 
@@ -138,15 +138,15 @@ $firstProducts = Product::in([1, 2, 3, 4]);
 
 If you prefer to find your models using a chainable OOP syntax the query() method is a  wrapper for the where() method. Each of the chainable finder methods meta() and tax can accept a varying amount of arguments. You must call the execute() method to run the query.
 
-**Meta()**
+**meta()**
 ```php
 Product::query()
     ->meta('meta_key', 'meta_value')
-    ->meta('meta_key', 'compare', meta_value')
-    ->meta('meta_key', 'compare', meta_value', 'type')
+    ->meta('meta_key', 'compare', 'meta_value')
+    ->meta('meta_key', 'compare', 'meta_value', 'type')
 ```
 
-**Tax()**
+**tax()**
 ```php
 Product::query()
     ->tax('taxonomy', 'terms')
@@ -154,7 +154,7 @@ Product::query()
     ->tax('taxonomy', 'field', 'operator', 'terms')
 ```
 
-**Params()**
+**params()**
 
 An array of additional arguments for WP_Query.
 ```php
