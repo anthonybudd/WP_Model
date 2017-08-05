@@ -378,9 +378,9 @@ $product->related; // (array) [Product, Product, Product]
 
 ### Serialization
 
-If you want to JSON encode a model and keep virtual properties you can do this by adding the property $serialize to the model.
+If you want to JSON encode a model and keep virtual properties you can do this by adding the property $serialize to the model. Conversely, if you would like to hide a property you can do this by adding $protected to the model.
 
-Conversely, if you would like to hide a property you can do this by adding $protected to the model
+Serialization will trigger the serializing event.
 
 ```php
 
@@ -520,6 +520,7 @@ You can also trigger the save, insert and delete events from the admin section o
 - deleted
 - hardDeleting
 - hardDeleted
+- serializing
 
 When saving a new model the saving, inserting, inserted and saved events are all fired (in that order).
 

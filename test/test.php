@@ -657,9 +657,30 @@ function test(){
 				error(__LINE__ .' asList()');
 			}
 
+			if(! (is_object($products[array_keys($products)[0]])) ){
+				error(__LINE__ .' asList()');
+			}
+
 			$products = Product::asList('color', Product::all());
 
 			if(! (is_array($products)) ){
+				error(__LINE__ .' asList()');
+			}
+
+			$products = Product::asList('color', [
+				Product::insert([
+					'color' => 'black'
+				]),
+				Product::insert([
+					'color' => 'black'
+				])
+			]);
+
+			if(! (is_array($products)) ){
+				error(__LINE__ .' asList()');
+			}
+
+			if(! ($products[array_keys($products)[0]] === 'black') ){
 				error(__LINE__ .' asList()');
 			}
 

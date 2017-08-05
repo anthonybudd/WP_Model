@@ -278,6 +278,7 @@ Abstract Class WP_Model implements JsonSerializable
 	 */
 	public function jsonSerialize()
     {
+    	$this->triggerEvent('serializing');
         return $this->toArray();
     }
 
@@ -334,7 +335,17 @@ Abstract Class WP_Model implements JsonSerializable
 				(
 					function_exists($this->filter[$attribute]) || 
 					$this->filter[$attribute] === 'the_content' ||
-					class_exists($this->filter[$attribute])
+					(
+						class_exists($this->filter[$attribute]) &&
+						(
+							(
+								is_object($this->get($attribute)) &&
+								!$this->get($attribute) instanceof WP_Model
+							) 
+							||
+							!Self::isArrayOfModels($this->get($attribute))
+						)
+					) 
 				)
 			)
 		);
@@ -370,12 +381,14 @@ Abstract Class WP_Model implements JsonSerializable
 						}
 					}
 
-					return $this->{$attribute} = &$return;
+					$this->set($attribute, $return);
+					return $return;
 				}else{
 					if(is_object($this->get($attribute))){
 						return $this->get($attribute);
 					}
-					return $this->{$attribute} = $className::find($this->get($attribute)); 
+					$this->set($attribute, $className::find($this->get($attribute)));
+					return $this->get($attribute);
 				}
 			}
 
@@ -865,7 +878,7 @@ Abstract Class WP_Model implements JsonSerializable
 	 * @param  array   $models
 	 * @return array
 	 */
-	public static function asList($value = 'title', $models = FALSE)
+	public static function asList($value = NULL, $models = FALSE)
 	{
 		if(!is_array($models)){
 			$self = get_called_class();
@@ -878,7 +891,13 @@ Abstract Class WP_Model implements JsonSerializable
 				$model = Self::find($model->ID);
 			}
 
-			$return[$model->ID] = $model->$value;
+			if(is_null($value)){
+				$return[$model->ID] = $model;
+			}else{
+				$return[$model->ID] = $model->$value;
+			}
+
+			
 		}
 
 		return $return;
@@ -1059,7 +1078,7 @@ Abstract Class WP_Model implements JsonSerializable
 		}else{
 			$this->_where[] = [
 				'taxonomy'  => $taxonomy,
-				'field'     => 'slug',
+				'field'     => (is_int($x)? 'term_id' : 'slug'),
 				'operator'  => 'IN',
 				'terms'     => $x,
 			];
@@ -1073,7 +1092,7 @@ Abstract Class WP_Model implements JsonSerializable
 		return Self::where($this->_where, $this->_params);
 	}
 
-	public function executeAsoc($key)
+	public function executeAsList($key = NULL)
 	{
 		$models = Self::where($this->_where, $this->_params);
 		return Self::asList($key, $models);
