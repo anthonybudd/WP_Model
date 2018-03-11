@@ -5,9 +5,9 @@
 ### A simple class for creating active record models of WordPress Posts.
 WP_Model is a pseudo ORM for WordPress designed to provide a better method for handling posts using a simple OOP style syntax. WP_Model has been specifically designed to be easy as possible for front-end developers (helper methods, taxonomies) and developers with an entry level knowledge of PHP, but powerful enough (virtual properties, relationships, events) that it could be genuinely useful to back-end devs who want to make complex WP based projects.
 
-#### Introduction: **[Medium Post](https://medium.com/@AnthonyBudd/wp-model-6887e1a24d3c)**
+## Introduction: **[Medium Post](https://medium.com/@AnthonyBudd/wp-model-6887e1a24d3c)**
 
-#### Advanced Functionality: **[Medium Post](https://medium.com/@AnthonyBudd/wp-model-advanced-b44f117617a7)**
+## Advanced Functionality: **[Medium Post](https://medium.com/@AnthonyBudd/wp-model-advanced-b44f117617a7)**
 
 
 ```php
