@@ -121,6 +121,7 @@ Abstract Class WP_Model implements JsonSerializable
 		register_post_type($postType, array_merge($defaults, $args));
 
 		Self::addHooks();
+		add_action('cmb2_admin_init', [get_called_class(), 'fieldsCallback']);
 	}
 
 	/**
@@ -133,6 +134,33 @@ Abstract Class WP_Model implements JsonSerializable
 		return Self::newInstance($insert)->save();
 	}
 
+	// -----------------------------------------------------
+	// CMB2
+	// -----------------------------------------------------
+	public static function fieldsCallback(){
+		$this_ = Self::newWithoutConstructor();
+
+		if(method_exists($this_, 'cmb2Fields')){
+			$fields = $this_->cmb2Fields();
+
+			if(function_exists('new_cmb2_box') && is_array($fields)){
+				if(!isset($fields['meta_box'])){
+					$fields['meta_box'] = [
+						'id'            => get_called_class(),
+						'title'         => get_called_class(),
+						'object_types'  => array($this_->postType),
+					];
+				}
+
+				$cmb = new_cmb2_box($fields['meta_box']);
+				unset($fields['meta_box']);
+
+				foreach($fields as $field){
+					$cmb->add_field($field);
+				} 
+			}
+		}
+	}
 
 	// -----------------------------------------------------
 	// EVENTS

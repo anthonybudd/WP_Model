@@ -127,4 +127,18 @@ Class Product extends WP_Model
 		global $events;
 		$events['hardDeleted'] = TRUE;
 	}
+
+	public function cmb2Fields(){
+		return [
+			[
+				'name' => 'Test Text',
+				'id'   => 'text',
+				'type' => 'text',
+			],[
+				'name' => 'Website URL', 'cmb2',
+				'id'   => 'url',
+				'type' => 'text_url',
+			]
+		];
+	}
 }
