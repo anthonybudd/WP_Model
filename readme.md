@@ -159,7 +159,7 @@ Product::query()
 An array of additional arguments for WP_Query.
 ```php
 Product::query()
-    ->params(['orderby' => 'meta_value', 'order' => 'ASC])
+    ->params(['orderby' => 'meta_value', 'order' => 'ASC'])
 ```
 
 #### Example:
