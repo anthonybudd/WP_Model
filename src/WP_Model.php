@@ -15,6 +15,7 @@ Abstract Class WP_Model implements JsonSerializable
 	public $ID;
 	public $_post;
 	public $_where;
+	public $_params;
 
 	public $attributes = [];
 	public $prefix = '';
